@@ -1,0 +1,357 @@
+{
+  "metadata": {
+    "totalStates": 33,
+    "totalDistricts": 43,
+    "totalTaluks": 62,
+    "database": "mongodb://localhost:27017/All_india_pin_code",
+    "totalPinCodes": 215,
+    "lastUpdated": "2026-04-04"
+  },
+  "data": [
+    {
+      "state": "ANDAMAN AND NICOBAR ISLANDS",
+      "districts": [
+        {
+          "name": "South Andaman",
+          "taluks": ["Port Blair"]
+        }
+      ]
+    },
+    {
+      "state": "ANDHRA PRADESH",
+      "districts": [
+        {
+          "name": "Krishna",
+          "taluks": ["Vijayawada"]
+        },
+        {
+          "name": "Visakhapatnam",
+          "taluks": ["Visakhapatnam"]
+        }
+      ]
+    },
+    {
+      "state": "ARUNACHAL PRADESH",
+      "districts": [
+        {
+          "name": "Papum Pare",
+          "taluks": ["Itanagar"]
+        }
+      ]
+    },
+    {
+      "state": "ASSAM",
+      "districts": [
+        {
+          "name": "Kamrup Metropolitan",
+          "taluks": ["Dispur", "Guwahati"]
+        }
+      ]
+    },
+    {
+      "state": "BIHAR",
+      "districts": [
+        {
+          "name": "Patna",
+          "taluks": ["Patna"]
+        }
+      ]
+    },
+    {
+      "state": "CHANDIGARH",
+      "districts": [
+        {
+          "name": "Chandigarh",
+          "taluks": ["Chandigarh"]
+        }
+      ]
+    },
+    {
+      "state": "CHHATTISGARH",
+      "districts": [
+        {
+          "name": "Raipur",
+          "taluks": ["Raipur"]
+        }
+      ]
+    },
+    {
+      "state": "DAMAN AND DIU",
+      "districts": [
+        {
+          "name": "Daman",
+          "taluks": ["Daman"]
+        },
+        {
+          "name": "Diu",
+          "taluks": ["Diu"]
+        }
+      ]
+    },
+    {
+      "state": "DELHI",
+      "districts": [
+        {
+          "name": "Central Delhi",
+          "taluks": ["Delhi"]
+        },
+        {
+          "name": "New Delhi",
+          "taluks": ["Delhi"]
+        },
+        {
+          "name": "North Delhi",
+          "taluks": ["Delhi"]
+        }
+      ]
+    },
+    {
+      "state": "GOA",
+      "districts": [
+        {
+          "name": "North Goa",
+          "taluks": ["Tiswadi"]
+        }
+      ]
+    },
+    {
+      "state": "GUJARAT",
+      "districts": [
+        {
+          "name": "Ahmedabad",
+          "taluks": ["Ahmedabad"]
+        },
+        {
+          "name": "Surat",
+          "taluks": ["Surat"]
+        },
+        {
+          "name": "Vadodara",
+          "taluks": ["Vadodara"]
+        }
+      ]
+    },
+    {
+      "state": "HIMACHAL PRADESH",
+      "districts": [
+        {
+          "name": "Shimla",
+          "taluks": ["Shimla"]
+        }
+      ]
+    },
+    {
+      "state": "JAMMU AND KASHMIR",
+      "districts": [
+        {
+          "name": "Jammu",
+          "taluks": ["Jammu"]
+        }
+      ]
+    },
+    {
+      "state": "JHARKHAND",
+      "districts": [
+        {
+          "name": "Ranchi",
+          "taluks": ["Ranchi"]
+        }
+      ]
+    },
+    {
+      "state": "KARNATAKA",
+      "districts": [
+        {
+          "name": "Bangalore",
+          "taluks": ["Bangalore North"]
+        }
+      ]
+    },
+    {
+      "state": "KERALA",
+      "districts": [
+        {
+          "name": "Thiruvananthapuram",
+          "taluks": ["Thiruvananthapuram"]
+        }
+      ]
+    },
+    {
+      "state": "LAKSHADWEEP",
+      "districts": [
+        {
+          "name": "Lakshadweep",
+          "taluks": ["Agatti", "Amini", "Androth", "Kalpeni", "Kavaratti"]
+        }
+      ]
+    },
+    {
+      "state": "MADHYA PRADESH",
+      "districts": [
+        {
+          "name": "Bhopal",
+          "taluks": ["Bhopal"]
+        },
+        {
+          "name": "Indore",
+          "taluks": ["Indore"]
+        }
+      ]
+    },
+    {
+      "state": "MAHARASHTRA",
+      "districts": [
+        {
+          "name": "Mumbai",
+          "taluks": ["Mumbai"]
+        },
+        {
+          "name": "Nagpur",
+          "taluks": ["Nagpur"]
+        },
+        {
+          "name": "Pune",
+          "taluks": ["Pune"]
+        }
+      ]
+    },
+    {
+      "state": "MANIPUR",
+      "districts": [
+        {
+          "name": "Imphal East",
+          "taluks": ["Imphal East"]
+        },
+        {
+          "name": "Imphal West",
+          "taluks": ["Imphal West"]
+        }
+      ]
+    },
+    {
+      "state": "MEGHALAYA",
+      "districts": [
+        {
+          "name": "East Khasi Hills",
+          "taluks": ["Shillong"]
+        }
+      ]
+    },
+    {
+      "state": "MIZORAM",
+      "districts": [
+        {
+          "name": "Aizawl",
+          "taluks": ["Aizawl"]
+        }
+      ]
+    },
+    {
+      "state": "NAGALAND",
+      "districts": [
+        {
+          "name": "Kohima",
+          "taluks": ["Kohima Sadar"]
+        }
+      ]
+    },
+    {
+      "state": "ODISHA",
+      "districts": [
+        {
+          "name": "Khordha",
+          "taluks": ["Bhubaneswar"]
+        }
+      ]
+    },
+    {
+      "state": "PUDUCHERRY",
+      "districts": [
+        {
+          "name": "Puducherry",
+          "taluks": ["Puducherry"]
+        }
+      ]
+    },
+    {
+      "state": "RAJASTHAN",
+      "districts": [
+        {
+          "name": "Jaipur",
+          "taluks": ["Jaipur"]
+        }
+      ]
+    },
+    {
+      "state": "SIKKIM",
+      "districts": [
+        {
+          "name": "East Sikkim",
+          "taluks": ["Gangtok"]
+        }
+      ]
+    },
+    {
+      "state": "TAMIL NADU",
+      "districts": [
+        {
+          "name": "Chennai",
+          "taluks": ["Chennai"]
+        },
+        {
+          "name": "Coimbatore",
+          "taluks": ["Coimbatore North"]
+        }
+      ]
+    },
+    {
+      "state": "TELANGANA",
+      "districts": [
+        {
+          "name": "Hyderabad",
+          "taluks": ["Hyderabad"]
+        }
+      ]
+    },
+    {
+      "state": "TRIPURA",
+      "districts": [
+        {
+          "name": "West Tripura",
+          "taluks": ["Agartala"]
+        }
+      ]
+    },
+    {
+      "state": "UTTAR PRADESH",
+      "districts": [
+        {
+          "name": "Kanpur Nagar",
+          "taluks": ["Kanpur"]
+        },
+        {
+          "name": "Lucknow",
+          "taluks": ["Lucknow"]
+        }
+      ]
+    },
+    {
+      "state": "UTTARAKHAND",
+      "districts": [
+        {
+          "name": "Dehradun",
+          "taluks": ["Dehradun"]
+        }
+      ]
+    },
+    {
+      "state": "WEST BENGAL",
+      "districts": [
+        {
+          "name": "Kolkata",
+          "taluks": ["Kolkata"]
+        }
+      ]
+    }
+  ]
+}

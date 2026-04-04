@@ -1,0 +1,35 @@
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/pincodeController');
+
+router.get('/states', controller.getStates);
+router.get('/states/:state/districts', controller.getDistrictsByState);
+router.get('/states/:state/districts/:district/taluks', controller.getTaluksByDistrict);
+router.get('/pincodes', controller.getPincodes);
+router.get('/search', controller.searchPincodes);
+router.get('/pincode/:pincode', controller.getPincodeDetail);
+router.get('/stats', controller.getStats);
+router.get('/stats/state-distribution', controller.getStateDistribution);
+router.get('/stats/delivery-distribution', controller.getDeliveryDistribution);
+router.get('/stats/office-distribution', controller.getOfficeTypeDistribution);
+router.get('/stats/division-stats', controller.getDivisionStats);
+router.get('/stats/region-coverage', controller.getRegionCoverage);
+router.get('/stats/search-analytics', controller.getSearchAnalytics);
+router.get('/stats/heatmap', controller.getHeatmapData);
+router.get('/stats/monthly-growth', controller.getMonthlyGrowth);
+router.get('/stats/top-districts', controller.getTopDistricts);
+router.get('/stats/circle-distribution', controller.getCircleDistribution);
+router.get('/stats/realtime', controller.getRealTimeStats);
+router.get('/nearby', controller.getNearbyPincodes);
+router.get('/autocomplete', controller.autocompletePincodes);
+router.post('/bulk-search', controller.bulkSearchPincodes);
+router.get('/address-autofill/:pincode', controller.addressAutofill);
+router.get('/delivery-estimate', controller.getDeliveryEstimate);
+router.get('/map-data', controller.getMapData);
+router.post('/compare-pincodes', controller.comparePincodes);
+router.get('/print-label/:pincode', controller.printLabelData);
+router.get('/export', controller.exportCsv);
+router.get('/thresholds', controller.getThresholds);
+router.post('/thresholds', controller.upsertThreshold);
+
+module.exports = router;
