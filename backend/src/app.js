@@ -10,6 +10,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', pincodeRoutes);
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Pincode Analyzer API',
+    version: '1.0.0',
+    documentation: '/api/docs',
+    status: 'Running'
+  });
+});
+
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
