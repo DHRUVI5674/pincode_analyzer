@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTheme } from '../context/ThemeContext';
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -42,12 +43,13 @@ const MapVisualization = () => {
   const fetchAllPincodes = async () => {
     try {
       setLoading(true);
-      // Fetch all PIN codes (you might want to add pagination for large datasets)
-      const response = await axios.get(`${API_URL}/pincodes?limit=1000`);
-      setPincodeData(response.data.pincodes || []);
+      // Fetch all PIN codes with a large limit
+      const response = await axios.get(`${API_URL}/pincodes?limit=1000&page=1`);
+      setPincodeData(response.data.data || []);
     } catch (error) {
       toast.error('Failed to load PIN code data for map');
       console.error(error);
+      setPincodeData([]);
     } finally {
       setLoading(false);
     }
