@@ -204,7 +204,7 @@ const Dashboard = () => {
         </div>
 
         {/* ══ Charts Row — Bar + Donut ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: '1.65fr 1fr', gap: 16 }}>
 
           {/* ── Segmental Density Bar Chart ── */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 22, padding: '24px 28px' }}>
@@ -340,7 +340,7 @@ const Dashboard = () => {
           </div>
 
           {/* body */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-0">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 0 }}>
 
             {/* Left – info panel */}
             <div style={{ padding: '28px 32px', borderRight: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -386,7 +386,7 @@ const Dashboard = () => {
 
             {/* Right – form */}
             <form ref={formRef} onSubmit={handleSubmit} style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 {[
                   { name: 'name', placeholder: 'Your Name *',    type: 'text',  key: 'name' },
                   { name: 'email', placeholder: 'Email Address *', type: 'email', key: 'email' },
