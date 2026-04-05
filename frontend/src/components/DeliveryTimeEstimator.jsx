@@ -94,7 +94,7 @@ const DeliveryTimeEstimator = () => {
       {/* Input Grid (Autocomplete Integrated) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
           {/* Origin Point */}
-          <div className="glass-card p-12 border-white/5 relative overflow-hidden group">
+          <div className="glass-card p-12 border-white/5 relative group">
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-[80px]" />
               <div className="flex items-center gap-6 mb-10">
                   <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
@@ -104,7 +104,7 @@ const DeliveryTimeEstimator = () => {
                       <h3 className="text-xs font-black opacity-30 tracking-[0.4em] uppercase">ORIGIN POINT</h3>
                   </div>
               </div>
-              <div className="relative z-20">
+              <div className="relative z-50">
                   <PincodeAutocomplete 
                     onSelect={(suggestion) => setSource(suggestion.pincode)} 
                     placeholder="Enter source PIN" 
@@ -113,7 +113,7 @@ const DeliveryTimeEstimator = () => {
           </div>
 
           {/* Destination Point */}
-          <div className="glass-card p-12 border-white/5 relative overflow-hidden group">
+          <div className="glass-card p-12 border-white/5 relative group">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/5 rounded-full blur-[80px]" />
               <div className="flex items-center gap-6 mb-10">
                   <div className="p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20">
@@ -123,7 +123,7 @@ const DeliveryTimeEstimator = () => {
                       <h3 className="text-xs font-black opacity-30 tracking-[0.4em] uppercase">DESTINATION POINT</h3>
                   </div>
               </div>
-              <div className="relative z-20">
+              <div className="relative z-50">
                   <PincodeAutocomplete 
                     onSelect={(suggestion) => setDestination(suggestion.pincode)} 
                     placeholder="Enter dest PIN" 
