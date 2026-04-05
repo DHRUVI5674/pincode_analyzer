@@ -2,11 +2,29 @@ const express = require('express');
 const cors = require('cors');
 const pincodeRoutes = require('./routes/pincodeRoutes');
 
+const mongoose = require('mongoose');
+const connectDB = require('./config/database');
+
 const app = express();
+
+// Database initialization middleware for serverless compatibility
+let isDBConnected = false;
+const initDb = async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+      console.log('✓ MongoDB connected for request');
+    } catch (err) {
+      console.error('Database connection error:', err.message);
+      return res.status(500).json({ message: 'Database connection failed' });
+    }
+  }
+  next();
+};
 
 // Allow both local dev and production origins
 app.use(cors({
-  origin: true, // During transition, let's allow all. Can be restricted later.
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -14,6 +32,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Attach database connection middleware BEFORE routes
+app.use(initDb);
 
 app.use('/api', pincodeRoutes);
 
