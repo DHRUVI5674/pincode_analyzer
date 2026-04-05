@@ -784,6 +784,7 @@ const getDeliveryEstimate = async (req, res) => {
     const toPin = destination || to;
 
     if (!fromPin || !toPin) {
+      console.log(`[DeliveryEstimate] Missing Params: Received source=${source}, destination=${destination}, from=${from}, to=${to}`);
       return res.status(400).json({ message: 'Both source and destination PIN codes are required' });
     }
 

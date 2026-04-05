@@ -42,12 +42,18 @@ const DeliveryTimeEstimator = () => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/delivery-estimate`, {
-        params: { source, destination }
+        params: { 
+          source: s, 
+          destination: d,
+          from: s,
+          to: d
+        }
       });
       setResult(response.data);
       toast.success('Route projection synchronized');
     } catch (error) {
-      const targetUrl = `${API_URL}/delivery-estimate`;
+      // Build diagnostic URL for the toast
+      const targetUrl = `${API_URL}/delivery-estimate?source=${s}&destination=${d}&from=${s}&to=${d}`;
       const msg = error.response?.data?.message || error.message || 'Simulation failed';
       toast.error(`Simulation Error: ${msg} (Target: ${targetUrl})`);
       console.error('Delivery Estimator Error:', (error.response?.data || error.message), 'at', targetUrl);
