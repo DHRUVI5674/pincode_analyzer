@@ -31,7 +31,10 @@ const DeliveryTimeEstimator = () => {
   const [result, setResult] = useState(null);
 
   const handleEstimate = async () => {
-    if (source.length !== 6 || destination.length !== 6) {
+    const s = String(source || '');
+    const d = String(destination || '');
+    
+    if (s.length !== 6 || d.length !== 6) {
       toast.error('Enter valid 6-digit PIN codes');
       return;
     }

@@ -46,7 +46,7 @@ const AddressAutofillForm = () => {
   };
 
   const handlePincodeChange = (e) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    const val = String(e.target.value || '').replace(/\D/g, '').slice(0, 6);
     setFormData(prev => ({ ...prev, pincode: val }));
     if (val.length === 6) performLookup(val);
   };
