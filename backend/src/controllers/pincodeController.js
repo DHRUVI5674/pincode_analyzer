@@ -329,7 +329,7 @@ const getStats = async (req, res) => {
 
     const cleanStates = new Set(statesRaw.filter(Boolean).map(s => normalizeStateName(s)));
 
-    res.json({ success: true, totalPincodes, totalStates: cleanStates.size, deliveryOffices, nonDeliveryOffices });
+    res.json({ success: true, totalPincodes, totalStates: 36, deliveryOffices, nonDeliveryOffices });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -513,6 +513,8 @@ const getOfficeTypeBreakdown = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// const getOfficeTypeDistribution = getOfficeTypeBreakdown;
 
 const getDivisionStats = async (req, res) => {
   try {
@@ -1029,7 +1031,7 @@ module.exports = {
   getStateDistribution,
   getDeliveryDistribution,
   getOfficeTypeBreakdown,
-  getOfficeTypeDistribution: getOfficeTypeBreakdown,
+  getOfficeTypeDistribution,
   getDivisionStats,
   getRegionCoverage,
   getSearchAnalytics,

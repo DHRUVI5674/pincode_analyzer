@@ -204,7 +204,7 @@ const Dashboard = () => {
         </div>
 
         {/* ══ Charts Row — Bar + Donut ══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.65fr 1fr', gap: 16 }}>
+        <div className="flex flex-col lg:grid lg:grid-cols-[1.65fr_1fr] gap-4">
 
           {/* ── Segmental Density Bar Chart ── */}
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 22, padding: '24px 28px' }}>
@@ -284,7 +284,7 @@ const Dashboard = () => {
             </div>
 
             {/* Legend tiles */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { label: 'Delivery Nodes', color: '#10b981', value: delivery?.delivery },
                 { label: 'Support Assets', color: '#f59e0b', value: delivery?.nonDelivery },
@@ -386,7 +386,7 @@ const Dashboard = () => {
 
             {/* Right – form */}
             <form ref={formRef} onSubmit={handleSubmit} style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[14px]">
                 {[
                   { name: 'name', placeholder: 'Your Name *',    type: 'text',  key: 'name' },
                   { name: 'email', placeholder: 'Email Address *', type: 'email', key: 'email' },
