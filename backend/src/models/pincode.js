@@ -13,7 +13,7 @@ const pincodeSchema = new mongoose.Schema({
   },
   officeType: {
     type: String,
-    enum: ['Delivery', 'Non-Delivery', 'Sub Office', 'Branch Office', 'Head Office'],
+    enum: ['Delivery', 'Non-Delivery', 'Sub Office', 'Branch Office', 'Head Office', 'B.O', 'S.O', 'H.O'],
     default: 'Delivery'
   },
   deliveryStatus: {
