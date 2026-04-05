@@ -27,6 +27,8 @@ function FitBounds({ center, radius }) {
   return null;
 }
 
+import { API_BASE_URL } from '../services/api';
+
 const MapIntegration = () => {
   const { darkMode } = useTheme();
   const [selectedPincode, setSelectedPincode] = useState(null);
@@ -49,7 +51,7 @@ const MapIntegration = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/nearby?lat=${selectedPincode.latitude}&lng=${selectedPincode.longitude}&radius=${searchRadius}`
+        `${API_BASE_URL}/nearby?lat=${selectedPincode.latitude}&lng=${selectedPincode.longitude}&radius=${searchRadius}`
       );
       const data = await response.json();
 

@@ -3,6 +3,8 @@ import { Search, MapPin } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useTheme } from '../context/ThemeContext';
 
+import { API_BASE_URL } from '../services/api';
+
 const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) => {
   const { darkMode } = useTheme();
   const [query, setQuery] = useState('');
@@ -23,7 +25,7 @@ const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) =>
 
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/autocomplete?q=${debouncedQuery}&limit=8`);
+        const response = await fetch(`${API_BASE_URL}/autocomplete?q=${debouncedQuery}&limit=8`);
         const data = await response.json();
         setSuggestions(data);
         setShowSuggestions(true);

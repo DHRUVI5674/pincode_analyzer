@@ -4,7 +4,7 @@ import PincodeAutocomplete from './PincodeAutocomplete';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { API_BASE_URL as API_URL } from '../services/api';
 
 const NearbySearch = () => {
     const { darkMode } = useTheme();

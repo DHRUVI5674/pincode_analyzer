@@ -28,7 +28,7 @@ function FitBounds({ markers }) {
   return null;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { API_BASE_URL as API_URL } from '../services/api';
 
 const MapVisualization = () => {
   const [pincodeData, setPincodeData] = useState([]);
