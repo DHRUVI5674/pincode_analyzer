@@ -106,6 +106,8 @@ const DeliveryTimeEstimator = () => {
               </div>
               <div className="relative z-50">
                   <PincodeAutocomplete 
+                    value={source}
+                    onChange={(val) => setSource(val)}
                     onSelect={(suggestion) => setSource(suggestion.pincode)} 
                     placeholder="Enter source PIN" 
                   />
@@ -125,6 +127,8 @@ const DeliveryTimeEstimator = () => {
               </div>
               <div className="relative z-50">
                   <PincodeAutocomplete 
+                    value={destination}
+                    onChange={(val) => setDestination(val)}
                     onSelect={(suggestion) => setDestination(suggestion.pincode)} 
                     placeholder="Enter dest PIN" 
                   />

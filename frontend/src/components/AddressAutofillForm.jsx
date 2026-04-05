@@ -94,6 +94,8 @@ const AddressAutofillForm = () => {
                     <label className="block text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">Pincode *</label>
                     <div className="relative group z-50">
                         <PincodeAutocomplete 
+                            value={formData.pincode}
+                            onChange={(val) => handlePincodeChange({ target: { value: val } })}
                             onSelect={handlePincodeSelect}
                             placeholder="Type for smart suggestion..."
                         />

@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 
 import { API_BASE_URL } from '../services/api';
 
-const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) => {
+const PincodeAutocomplete = ({ value = '', onSelect, onChange, placeholder = "Enter PIN code..." }) => {
   const { darkMode } = useTheme();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -15,6 +15,10 @@ const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) =>
   const debouncedQuery = useDebounce(query, 300);
   const inputRef = useRef(null);
   const suggestionsRef = useRef(null);
+
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -41,8 +45,10 @@ const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) =>
   }, [debouncedQuery]);
 
   const handleInputChange = (e) => {
-    setQuery(e.target.value);
+    const val = e.target.value;
+    setQuery(val);
     setSelectedIndex(-1);
+    if (onChange) onChange(val);
   };
 
   const handleKeyDown = (e) => {
@@ -76,6 +82,9 @@ const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) =>
     setQuery(suggestion.pincode);
     setShowSuggestions(false);
     setSelectedIndex(-1);
+    if (onChange) {
+      onChange(suggestion.pincode);
+    }
     if (onSelect) {
       onSelect(suggestion);
     }
