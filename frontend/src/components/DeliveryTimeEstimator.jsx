@@ -47,7 +47,9 @@ const DeliveryTimeEstimator = () => {
       setResult(response.data);
       toast.success('Route projection synchronized');
     } catch (error) {
-      toast.error('Simulation failed: Geospatial data mismatch');
+      const msg = error.response?.data?.message || error.message || 'Simulation failed';
+      toast.error(`Simulation Error: ${msg}`);
+      console.error('Delivery Estimator Error:', (error.response?.data || error.message));
     } finally {
       setLoading(false);
     }

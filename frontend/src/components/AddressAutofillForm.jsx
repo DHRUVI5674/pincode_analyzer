@@ -36,10 +36,10 @@ const AddressAutofillForm = () => {
         }));
         toast.success('Smart lookup complete');
       } else {
-        toast.error('Node not found');
+        toast.error(`Lookup Failed: ${data.message || 'Node not found'}`);
       }
     } catch (error) {
-      toast.error('Lookup system offline');
+      toast.error(`System Error: ${error.message || 'Lookup system offline'}`);
     } finally {
       setLoading(false);
     }
