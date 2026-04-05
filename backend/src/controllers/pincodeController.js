@@ -780,17 +780,21 @@ const addressAutofill = async (req, res) => {
 const getDeliveryEstimate = async (req, res) => {
   try {
     const { from, to, source, destination } = req.query;
-    const fromPin = source || from;
-    const toPin = destination || to;
+    // Extreme redundancy: check query, then body, then params
+    const fPin = source || from || req.body.source || req.body.from || req.params.pincode1;
+    const tPin = destination || to || req.body.destination || req.body.to || req.params.pincode2;
 
-    if (!fromPin || !toPin) {
-      console.log(`[DeliveryEstimate] Missing Params: Received source=${source}, destination=${destination}, from=${from}, to=${to}`);
-      return res.status(400).json({ message: 'Both source and destination PIN codes are required' });
+    if (!fPin || !tPin) {
+      console.log(`[DeliveryEstimate] Missing Params: qSource=${source}, qDest=${destination}, bSource=${req.body.source}`);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Both source and destination PIN codes are required',
+        received: { from: fPin, to: tPin }
+      });
     }
 
-    // Input might be string from query, convert to Number to match schema
-    const sourceNum = parseInt(fromPin);
-    const destNum = parseInt(toPin);
+    const sourceNum = parseInt(fPin);
+    const destNum = parseInt(tPin);
 
     const [sourcePin, destPin] = await Promise.all([
       Pincode.findOne({ pincode: sourceNum }).select('latitude longitude stateName districtName regionName ' + STATE_KEY + ' ' + DISTRICT_KEY).lean(),

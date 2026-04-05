@@ -41,14 +41,9 @@ const DeliveryTimeEstimator = () => {
 
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/delivery-estimate`, {
-        params: { 
-          source: s, 
-          destination: d,
-          from: s,
-          to: d
-        }
-      });
+      // Manual URL construction for production-proof parameter passing
+      const url = `${API_URL}/delivery-estimate?source=${s}&destination=${d}&from=${s}&to=${d}`;
+      const response = await axios.get(url);
       setResult(response.data);
       toast.success('Route projection synchronized');
     } catch (error) {
