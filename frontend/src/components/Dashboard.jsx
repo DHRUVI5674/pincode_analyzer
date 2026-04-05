@@ -18,7 +18,7 @@ const EJ_SERVICE  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || 'service_vehl12p
 const EJ_TEMPLATE = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'service_vehl12p';
 const EJ_PUBKEY   = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || 'QKFS18dSWKVZLrE8g';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { API_BASE_URL as API_URL } from '../services/api';
 
 /* ── palette exactly matching reference ── */
 const BAR_PALETTE = ['#6366f1','#f43f5e','#10b981','#f59e0b','#8b5cf6','#6366f1','#f43f5e','#10b981','#f59e0b','#8b5cf6'];
