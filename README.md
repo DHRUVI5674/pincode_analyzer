@@ -1,6 +1,6 @@
 # 🚀 NEXUS OS – Logistics Intelligence Engine V2.0
 
-![Dashboard Preview](file:///C:/Users/Patel%20Dhruvi/.gemini/antigravity/brain/f4b9b2b2-a4fb-4c8a-a20c-b39105e4fb31/section_1_metric_cards_1775373816618.png)
+![Dashboard Preview](https://res.cloudinary.com/db3htfvvx/image/upload/q_auto/f_auto/v1775379466/Screenshot_2026-04-05_141404_n5wvwj.png)
 
 Welcome to the **Logistics Intelligence Engine V2.0**, a state-of-the-art, high-fidelity geospatial intelligence platform designed to seamlessly visualize, interact with, and analyze the entirety of India’s postal and delivery logistics network. 
 
@@ -81,7 +81,7 @@ Ready to push this engine to production? Both codebases are natively structured 
 1. Import your repository as a new Vercel project.
 2. Specify Root Directory as `frontend`. Let Vercel auto-detect Vite.
 3. Inject your **Environment Variables**:
-   * `VITE_API_URL` = Your new Render URL followed by `/api` *(e.g., https://your-render-app.onrender.com/api)*
+   * `VITE_API_URL` = Your new Render URL followed by `/api` *(e.g., (https://pincode-analyzer-9.onrender.com/api))*
    * `VITE_EMAILJS_SERVICE_ID` = `service_vehl12p`
    * `VITE_EMAILJS_TEMPLATE_ID` = `service_vehl12p`
    * `VITE_EMAILJS_PUBLIC_KEY` = `QKFS18dSWKVZLrE8g`
