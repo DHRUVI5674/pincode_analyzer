@@ -4,7 +4,23 @@ const pincodeRoutes = require('./routes/pincodeRoutes');
 
 const app = express();
 
-app.use(cors());
+// Allow both local dev and production origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://pincode-analyzer-7.onrender.com',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    return callback(null, true); // allow all for now; restrict in production
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useTheme } from '../context/ThemeContext';
+import { getStates, getDistricts, getTaluks } from '../services/api';
 
 const StateDistrictTalukSelector = () => {
   const { darkMode } = useTheme();
@@ -27,39 +28,25 @@ const StateDistrictTalukSelector = () => {
       try {
         setLoading(true);
         console.log('Fetching states from MongoDB...');
-        const response = await fetch('http://localhost:5000/api/states');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const statesList = await response.json();
+
+        const statesList = await getStates();
         console.log('States fetched:', statesList);
 
         if (!Array.isArray(statesList)) {
           throw new Error('Expected array of states');
         }
 
-        // Fetch districts and taluks for each state
         const statesWithData = await Promise.all(
           statesList.map(async (state) => {
             try {
-              const districtResponse = await fetch(
-                `http://localhost:5000/api/states/${encodeURIComponent(state)}/districts`
-              );
-              const districts = Array.isArray(districtResponse.ok ? await districtResponse.json() : []);
-
-              // Fetch taluks for each district
+              const districts = await getDistricts(state);
               const districtsWithTaluks = await Promise.all(
                 districts.map(async (district) => {
                   try {
-                    const talukResponse = await fetch(
-                      `http://localhost:5000/api/states/${encodeURIComponent(state)}/districts/${encodeURIComponent(district)}/taluks`
-                    );
-                    const taluks = Array.isArray(talukResponse.ok ? await talukResponse.json() : []);
+                    const taluks = await getTaluks(state, district);
                     return {
                       name: district,
-                      taluks: taluks || [],
+                      taluks: Array.isArray(taluks) ? taluks : [],
                     };
                   } catch (err) {
                     console.warn(`Error fetching taluks for ${district}:`, err);

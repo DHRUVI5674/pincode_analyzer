@@ -1,278 +1,149 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, RefreshCw, Check } from 'lucide-react';
-import PincodeAutocomplete from './PincodeAutocomplete';
+import React, { useState } from 'react';
+import { MapPin, CheckCircle2, AlertCircle, Copy, Check, Sparkles, Navigation, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const AddressAutofillForm = () => {
   const { darkMode } = useTheme();
-  const [selectedPincode, setSelectedPincode] = useState(null);
-  const [addressData, setAddressData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [manualEntry, setManualEntry] = useState({
+  const [formData, setFormData] = useState({
     pincode: '',
-    postOffice: '',
-    taluk: '',
+    addressLine: '',
+    landmark: '',
+    city: '',
     district: '',
     state: '',
-    division: '',
-    region: '',
-    circle: '',
-    country: 'INDIA'
+    country: 'India'
   });
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const handlePincodeSelect = async (pincodeData) => {
-    setSelectedPincode(pincodeData);
-    setLoading(true);
+  const handlePincodeChange = async (e) => {
+    const pincode = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setFormData(prev => ({ ...prev, pincode }));
 
-    try {
-      const response = await fetch(`http://localhost:5000/api/address-autofill/${pincodeData.pincode}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setAddressData(data.address);
-        setManualEntry({
-          pincode: data.address.pincode,
-          postOffice: data.address.postOffice,
-          taluk: data.address.taluk,
-          district: data.address.district,
-          state: data.address.state,
-          division: data.address.division,
-          region: data.address.region,
-          circle: data.address.circle,
-          country: data.address.country
-        });
-        toast.success('Address auto-filled successfully!');
-      } else {
-        toast.error('Failed to fetch address data');
+    if (pincode.length === 6) {
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/address-autofill/${pincode}`);
+        const data = await response.json();
+        if (data.success) {
+          setFormData(prev => ({
+            ...prev,
+            city: data.address.postOffice || '',
+            district: data.address.district || '',
+            state: data.address.state || ''
+          }));
+          toast.success('Smart lookup complete');
+        } else {
+            toast.error('Node not found');
+        }
+      } catch (error) {
+        toast.error('Lookup system offline');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Address autofill error:', error);
-      toast.error('Failed to auto-fill address');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleManualChange = (field, value) => {
-    setManualEntry(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const copyAddress = () => {
+    const fullAddress = `${formData.addressLine}${formData.landmark ? ', ' + formData.landmark : ''}\n${formData.city}, ${formData.district}\n${formData.state} - ${formData.pincode}\n${formData.country}`;
+    navigator.clipboard.writeText(fullAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success('Address copied');
   };
 
   const resetForm = () => {
-    setSelectedPincode(null);
-    setAddressData(null);
-    setManualEntry({
-      pincode: '',
-      postOffice: '',
-      taluk: '',
-      district: '',
-      state: '',
-      division: '',
-      region: '',
-      circle: '',
-      country: 'INDIA'
-    });
-  };
-
-  const copyAddress = () => {
-    const addressText = `${manualEntry.postOffice}
-${manualEntry.taluk}, ${manualEntry.district}
-${manualEntry.state} - ${manualEntry.pincode}
-${manualEntry.country}`;
-
-    navigator.clipboard.writeText(addressText.trim());
-    toast.success('Address copied to clipboard!');
+      setFormData({
+        pincode: '',
+        addressLine: '',
+        landmark: '',
+        city: '',
+        district: '',
+        state: '',
+        country: 'India'
+      });
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg">
-      <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-        📍 Address Auto-fill Form
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Enter a PIN code to automatically fill address details
-      </p>
-
-      {/* PIN Code Input */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          PIN Code *
-        </label>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <PincodeAutocomplete
-              onSelect={handlePincodeSelect}
-              placeholder="Enter PIN code to auto-fill address..."
-            />
-          </div>
-          <button
-            onClick={resetForm}
-            className="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Reset
-          </button>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <div className="flex items-center gap-3">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-            <span className="text-blue-700 dark:text-blue-300">Fetching address details...</span>
-          </div>
-        </div>
-      )}
-
-      {/* Address Form */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Left Column */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Post Office
-            </label>
-            <input
-              type="text"
-              value={manualEntry.postOffice}
-              onChange={(e) => handleManualChange('postOffice', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Post office name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Taluk
-            </label>
-            <input
-              type="text"
-              value={manualEntry.taluk}
-              onChange={(e) => handleManualChange('taluk', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Taluk name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              District *
-            </label>
-            <input
-              type="text"
-              value={manualEntry.district}
-              onChange={(e) => handleManualChange('district', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="District name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              State *
-            </label>
-            <input
-              type="text"
-              value={manualEntry.state}
-              onChange={(e) => handleManualChange('state', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="State name"
-            />
-          </div>
+    <div className={`max-w-4xl mx-auto p-1 border rounded-[3rem] transition-all duration-500 overflow-hidden ${darkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100 shadow-2xl shadow-gray-200/50'}`}>
+      <div className={`p-8 lg:p-12 rounded-[2.9rem] ${darkMode ? 'bg-[#0b0d14]' : 'bg-white'}`}>
+        <div className="flex items-center gap-4 mb-12">
+            <div className="p-4 bg-indigo-500 text-white rounded-[1.5rem] shadow-xl shadow-indigo-500/20">
+                <Sparkles className="w-8 h-8" />
+            </div>
+            <div>
+                <h1 className="text-3xl font-black tracking-tight">Smart <span className="text-indigo-500">Checkout</span></h1>
+                <p className="text-sm font-medium opacity-50 uppercase tracking-widest leading-none mt-1">Intuitive Address Synthesis</p>
+            </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Division
-            </label>
-            <input
-              type="text"
-              value={manualEntry.division}
-              onChange={(e) => handleManualChange('division', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Division name"
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+                <div>
+                    <label className="block text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">Pincode *</label>
+                    <div className="relative group">
+                        <MapPin className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${loading ? 'animate-pulse text-indigo-500' : 'opacity-30 group-focus-within:opacity-100 group-focus-within:text-indigo-500'}`} />
+                        <input 
+                            type="text" value={formData.pincode} onChange={handlePincodeChange}
+                            className={`w-full pl-12 pr-4 py-4 rounded-2xl border transition-all ${darkMode ? 'bg-white/5 border-white/10 focus:bg-white/10' : 'bg-gray-50 border-gray-200 focus:bg-white'} focus:ring-4 focus:ring-indigo-500/10 outline-none font-bold text-lg`}
+                            placeholder="6-digit PIN"
+                        />
+                    </div>
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Region
-            </label>
-            <input
-              type="text"
-              value={manualEntry.region}
-              onChange={(e) => handleManualChange('region', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Region name"
-            />
-          </div>
+                <div>
+                    <label className="block text-xs font-black uppercase tracking-widest opacity-40 mb-2">Detailed Address</label>
+                    <textarea 
+                        value={formData.addressLine} onChange={e => setFormData({...formData, addressLine: e.target.value})}
+                        className={`w-full px-4 py-4 h-32 rounded-2xl border transition-all ${darkMode ? 'bg-white/5 border-white/10 focus:bg-white/10' : 'bg-gray-50 border-gray-200 focus:bg-white'} outline-none focus:ring-4 focus:ring-indigo-500/10 resize-none`}
+                        placeholder="Street, Building, Flat No..."
+                    />
+                </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Circle
-            </label>
-            <input
-              type="text"
-              value={manualEntry.circle}
-              onChange={(e) => handleManualChange('circle', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Circle name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Country
-            </label>
-            <input
-              type="text"
-              value={manualEntry.country}
-              onChange={(e) => handleManualChange('country', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Country name"
-            />
-          </div>
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6">
+                    {[
+                        { label: 'City / PO', key: 'city', icon: Navigation },
+                        { label: 'District', key: 'district' },
+                        { label: 'State', key: 'state' }
+                    ].map(field => (
+                        <div key={field.key}>
+                            <label className="block text-xs font-black uppercase tracking-widest opacity-40 mb-2">{field.label}</label>
+                            <input 
+                                type="text" readOnly value={formData[field.key]}
+                                className={`w-full px-4 py-4 rounded-2xl border transition-all cursor-not-allowed opacity-60 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'} font-bold shadow-inner`}
+                                placeholder="Locked field"
+                            />
+                        </div>
+                    ))}
+                </div>
+                
+                <div className="pt-4 flex gap-4">
+                    <button 
+                        onClick={copyAddress}
+                        disabled={!formData.pincode || !formData.city}
+                        className="flex-1 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                        Copy Result
+                    </button>
+                    <button onClick={resetForm} className={`px-6 py-4 rounded-2xl border font-bold transition-all hover:bg-rose-500/10 hover:text-rose-500 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                        <RotateCcw className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      {/* Address Preview */}
-      {(manualEntry.postOffice || manualEntry.district || manualEntry.state) && (
-        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">📬 Address Preview:</h3>
-          <div className="font-mono text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 p-3 rounded border">
-            {manualEntry.postOffice && <div>{manualEntry.postOffice}</div>}
-            {(manualEntry.taluk || manualEntry.district) && (
-              <div>{[manualEntry.taluk, manualEntry.district].filter(Boolean).join(', ')}</div>
-            )}
-            {manualEntry.state && <div>{manualEntry.state}{manualEntry.pincode && ` - ${manualEntry.pincode}`}</div>}
-            {manualEntry.country && <div>{manualEntry.country}</div>}
-          </div>
-          <button
-            onClick={copyAddress}
-            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Check className="h-4 w-4" />
-            Copy Address
-          </button>
+        <div className={`mt-12 p-6 rounded-[2rem] border transition-all duration-700 ${formData.pincode.length === 6 && formData.city ? 'opacity-100 translate-y-0' : 'opacity-30 translate-y-4'} ${darkMode ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
+            <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="text-xs font-black uppercase tracking-widest">Synthesis active: Haversine-optimized address resolution enabled</span>
+            </div>
         </div>
-      )}
-
-      {/* Instructions */}
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">💡 How to use:</h3>
-        <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-          <li>• Start typing a PIN code to see autocomplete suggestions</li>
-          <li>• Select a PIN code to auto-fill all address fields</li>
-          <li>• Edit any field manually if needed</li>
-          <li>• Use "Copy Address" to copy the formatted address</li>
-          <li>• Click "Reset" to clear all fields</li>
-        </ul>
       </div>
     </div>
   );

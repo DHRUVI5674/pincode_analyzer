@@ -31,17 +31,17 @@ const AppInner = () => {
   return (
     <Router>
       <div className={`min-h-screen flex flex-col transition-colors duration-300 ${
-        darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+        darkMode ? 'bg-[#0d0f14]' : 'bg-slate-50'
       }`}>
         <ModernNavbar />
         
         <div className="flex flex-1">
           {/* Main Content */}
-          <main className="flex-1 container mx-auto px-4 py-8">
+          <main className="flex-1 w-full">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/classic" element={<Explore />} />
+              <Route path="/landing" element={<ModernPincodeDashboard />} />
               <Route path="/map" element={<MapVisualization />} />
               <Route path="/nearby" element={<NearbySearch />} />
               <Route path="/analytics" element={<AnalyticsDashboard />} />

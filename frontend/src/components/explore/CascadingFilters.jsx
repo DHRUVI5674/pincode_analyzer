@@ -12,6 +12,7 @@ const CascadingFilters = ({
   onStateChange,
   onDistrictChange,
   onTalukChange,
+  isLoadingStates,
   isLoadingDistricts,
   isLoadingTaluks,
   clearFilters,
@@ -27,8 +28,9 @@ const CascadingFilters = ({
             className="w-full appearance-none rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             value={selectedState}
             onChange={(e) => onStateChange(e.target.value)}
+            disabled={isLoadingStates}
           >
-            <option value="">All States</option>
+            <option value="">{isLoadingStates ? 'Loading states...' : 'Select a state'}</option>
             {states?.map((state) => (
               <option key={state} value={state}>{state}</option>
             ))}
@@ -44,9 +46,9 @@ const CascadingFilters = ({
             className="w-full appearance-none rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             value={selectedDistrict}
             onChange={(e) => onDistrictChange(e.target.value)}
-            disabled={isLoadingDistricts || !districts?.length}
+            disabled={isLoadingDistricts || !selectedState}
           >
-            <option value="">All Districts</option>
+            <option value="">{selectedState ? (isLoadingDistricts ? 'Loading districts...' : 'Select a district') : 'Select a state first'}</option>
             {districts?.map((district) => (
               <option key={district} value={district}>{district}</option>
             ))}
@@ -71,9 +73,9 @@ const CascadingFilters = ({
             className="w-full appearance-none rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             value={selectedTaluk}
             onChange={(e) => onTalukChange(e.target.value)}
-            disabled={isLoadingTaluks || !taluks?.length}
+            disabled={isLoadingTaluks || !selectedDistrict}
           >
-            <option value="">All Taluks</option>
+            <option value="">{selectedDistrict ? (isLoadingTaluks ? 'Loading taluks...' : 'Select a taluk') : 'Select a district first'}</option>
             {taluks?.map((taluk) => (
               <option key={taluk} value={taluk}>{taluk}</option>
             ))}

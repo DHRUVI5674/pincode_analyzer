@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Eye, Trash2, History, Search, Download } from 'lucide-react';
+import { Clock, Eye, Trash2, History, Search, Download, ArrowUpRight, Calendar, Zap, Box } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 
@@ -7,378 +7,102 @@ const RecentlyViewed = () => {
   const { darkMode } = useTheme();
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [maxItems, setMaxItems] = useState(50);
 
-  // Load recently viewed from localStorage on component mount
   useEffect(() => {
     const saved = localStorage.getItem('recentlyViewedPincodes');
     if (saved) {
-      try {
-        setRecentlyViewed(JSON.parse(saved));
-      } catch (error) {
-        console.error('Error loading recently viewed:', error);
-        localStorage.removeItem('recentlyViewedPincodes');
-      }
+      try { setRecentlyViewed(JSON.parse(saved)); } catch (e) { localStorage.removeItem('recentlyViewedPincodes'); }
     }
   }, []);
 
-  // Save to localStorage whenever recentlyViewed changes
-  useEffect(() => {
-    localStorage.setItem('recentlyViewedPincodes', JSON.stringify(recentlyViewed));
-  }, [recentlyViewed]);
-
-  // Function to add a PIN code to recently viewed (called from other components)
-  const addToRecentlyViewed = (pincodeData) => {
-    const newEntry = {
-      ...pincodeData,
-      viewedAt: new Date().toISOString(),
-      id: `${pincodeData.pincode}_${Date.now()}`
-    };
-
-    setRecentlyViewed(prev => {
-      // Remove if already exists
-      const filtered = prev.filter(item => item.pincode !== pincodeData.pincode);
-      // Add to beginning and limit to maxItems
-      return [newEntry, ...filtered].slice(0, maxItems);
-    });
-  };
-
-  // Expose addToRecentlyViewed globally for other components
-  useEffect(() => {
-    window.addToRecentlyViewed = addToRecentlyViewed;
-    return () => {
-      delete window.addToRecentlyViewed;
-    };
-  }, [maxItems]);
-
-  const removeFromRecentlyViewed = (id) => {
-    setRecentlyViewed(prev => prev.filter(item => item.id !== id));
-    toast.success('Removed from recently viewed');
-  };
-
-  const clearAllRecentlyViewed = () => {
-    if (recentlyViewed.length === 0) return;
-
-    if (window.confirm(`Are you sure you want to clear all ${recentlyViewed.length} recently viewed items?`)) {
+  const clearAll = () => {
+    if (window.confirm('Wipe timeline history?')) {
       setRecentlyViewed([]);
-      toast.success('Recently viewed history cleared');
+      localStorage.removeItem('recentlyViewedPincodes');
+      toast.success('Timeline reset');
     }
   };
 
-  const exportRecentlyViewed = () => {
-    if (recentlyViewed.length === 0) {
-      toast.error('No recently viewed items to export');
-      return;
-    }
-
-    const csvContent = [
-      ['PIN Code', 'Office Name', 'District', 'State', 'Taluk', 'Viewed Date', 'Viewed Time'],
-      ...recentlyViewed.map(item => [
-        item.pincode,
-        item.officeName,
-        item.district,
-        item.state,
-        item.taluk || '',
-        new Date(item.viewedAt).toLocaleDateString(),
-        new Date(item.viewedAt).toLocaleTimeString()
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `recently-viewed-pincodes-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast.success('Recently viewed exported to CSV');
-  };
-
-  // Filter recently viewed
-  const filteredItems = recentlyViewed.filter(item =>
-    item.pincode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.officeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.state.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = recentlyViewed.filter(item => 
+    [item.pincode, item.officeName, item.district].some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const getTimeAgo = (dateString) => {
-    const now = new Date();
-    const viewedAt = new Date(dateString);
-    const diffInMinutes = Math.floor((now - viewedAt) / (1000 * 60));
-
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-
-    return viewedAt.toLocaleDateString();
-  };
-
-  const getTimeCategory = (dateString) => {
-    const now = new Date();
-    const viewedAt = new Date(dateString);
-    const diffInHours = (now - viewedAt) / (1000 * 60 * 60);
-
-    if (diffInHours < 1) return 'recent';
-    if (diffInHours < 24) return 'today';
-    if (diffInHours < 168) return 'week'; // 7 days
-    return 'older';
-  };
-
-  const groupedItems = filteredItems.reduce((groups, item) => {
-    const category = getTimeCategory(item.viewedAt);
-    if (!groups[category]) groups[category] = [];
-    groups[category].push(item);
-    return groups;
-  }, {});
-
-  const categoryLabels = {
-    recent: 'Just Now (Last Hour)',
-    today: 'Today',
-    week: 'This Week',
-    older: 'Older'
-  };
-
-  const categoryColors = {
-    recent: 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200',
-    today: 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200',
-    week: 'bg-orange-100 dark:bg-orange-800 text-orange-800 dark:text-orange-200',
-    older: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
+  const getTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return new Date(date).toLocaleDateString();
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg">
-      <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-        🕐 Recently Viewed
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Track and revisit PIN codes you've recently looked up
-      </p>
-
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div className={`max-w-6xl mx-auto p-4 sm:p-10 rounded-[3.5rem] border transition-all duration-700 ${darkMode ? 'bg-[#080a0f] border-white/5 text-white' : 'bg-white border-gray-100 text-gray-900 shadow-2xl'}`}>
+      
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            📋 Recent Activity ({recentlyViewed.length})
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Automatically tracks PIN codes you view across the app
-          </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                <Clock className="w-4 h-4" /> Temporal Analytics
+            </div>
+            <h1 className="text-5xl font-black tracking-tighter mb-3">Activity <span className="text-indigo-500">Timeline</span></h1>
+            <p className="font-bold opacity-40 uppercase tracking-widest text-xs">Sequential record of geospatial node interactions</p>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search recent..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          {/* Max Items */}
-          <select
-            value={maxItems}
-            onChange={(e) => setMaxItems(Number(e.target.value))}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          >
-            <option value={25}>Max 25</option>
-            <option value={50}>Max 50</option>
-            <option value={100}>Max 100</option>
-            <option value={200}>Max 200</option>
-          </select>
-
-          {/* Export */}
-          <button
-            onClick={exportRecentlyViewed}
-            disabled={recentlyViewed.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </button>
-
-          {/* Clear All */}
-          <button
-            onClick={clearAllRecentlyViewed}
-            disabled={recentlyViewed.length === 0}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear All
-          </button>
+        <div className="flex items-center gap-4 w-full lg:w-auto">
+            <div className="relative flex-1 lg:w-80 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30 group-focus-within:opacity-100 text-indigo-400" />
+                <input 
+                    type="text" placeholder="Filter Timeline..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+                    className={`w-full pl-12 pr-4 py-4 rounded-[1.5rem] border transition-all ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'} outline-none focus:ring-4 focus:ring-indigo-500/10 font-bold`}
+                />
+            </div>
+            <button onClick={clearAll} className={`p-4 rounded-[1.5rem] border hover:bg-rose-500/10 hover:text-rose-500 transition-all ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'}`}>
+                <Trash2 className="w-6 h-6" />
+            </button>
         </div>
       </div>
 
-      {/* Recently Viewed List */}
-      {filteredItems.length === 0 ? (
-        <div className="text-center py-12">
-          {recentlyViewed.length === 0 ? (
-            <div>
-              <History className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No recently viewed PIN codes
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Start exploring PIN codes and they'll appear here automatically.
-              </p>
-            </div>
-          ) : (
-            <div>
-              <Search className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No matches found
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Try adjusting your search terms.
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedItems).map(([category, items]) => (
-            <div key={category}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${categoryColors[category]}`}>
-                  {categoryLabels[category]} ({items.length})
-                </span>
-              </div>
+      <div className="relative">
+        {/* Timeline connector */}
+        <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500/50 via-indigo-500/20 to-transparent rounded-full hidden sm:block" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          Viewed {getTimeAgo(item.viewedAt)}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => removeFromRecentlyViewed(item.id)}
-                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1"
-                        title="Remove from recently viewed"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {item.officeName}
+        <div className="space-y-10">
+            {filtered.length > 0 ? filtered.map((item, i) => (
+                <div key={i} className="relative pl-0 sm:pl-16 group">
+                    {/* Timeline dot */}
+                    <div className="absolute left-4 top-2 w-5 h-5 rounded-full border-4 border-[#080a0f] bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.5)] hidden sm:block transition-transform group-hover:scale-125" />
+                    
+                    <div className={`p-8 rounded-[2.5rem] border transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:translate-x-2 ${darkMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' : 'bg-white border-gray-100 hover:border-gray-200 shadow-xl shadow-gray-200/20'}`}>
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-500 flex flex-col items-center justify-center text-white shadow-xl shadow-indigo-500/30">
+                                <span className="text-xs font-black opacity-60 leading-none mb-1 text-center truncate px-1 uppercase">{item.state.slice(0,3)}</span>
+                                <span className="text-xl font-black leading-none">{item.pincode.slice(-3)}</span>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-2xl font-black tracking-tight">{item.pincode}</h3>
+                                    <Zap className="w-4 h-4 text-amber-400 fill-current" />
+                                </div>
+                                <p className="font-bold opacity-60 uppercase text-[10px] tracking-widest">{item.officeName} • {item.district}</p>
+                            </div>
                         </div>
-                        <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                          PIN: {item.pincode}
+
+                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2">
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                                <Calendar className="w-3 h-3" /> {getTimeAgo(item.viewedAt)}
+                            </div>
+                            <button className="p-3 rounded-xl bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all shadow-lg active:scale-95">
+                                <ArrowUpRight className="w-5 h-5" />
+                            </button>
                         </div>
-                      </div>
-
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <div>{item.district}, {item.state}</div>
-                        {item.taluk && <div>Taluk: {item.taluk}</div>}
-                      </div>
-
-                      <div className="text-xs text-gray-500 dark:text-gray-500 pt-2 border-t border-gray-200 dark:border-gray-700">
-                        {new Date(item.viewedAt).toLocaleString()}
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                </div>
+            )) : (
+                <div className="py-20 text-center opacity-10">
+                    <History className="w-32 h-32 mx-auto mb-6" />
+                    <p className="text-2xl font-black uppercase tracking-[1em]">Void</p>
+                </div>
+            )}
         </div>
-      )}
-
-      {/* Statistics */}
-      {recentlyViewed.length > 0 && (
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">📊 Activity Statistics</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="font-medium text-blue-800 dark:text-blue-300">Total Viewed</div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{recentlyViewed.length}</div>
-            </div>
-            <div>
-              <div className="font-medium text-blue-800 dark:text-blue-300">Last Hour</div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                {recentlyViewed.filter(item => getTimeCategory(item.viewedAt) === 'recent').length}
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-blue-800 dark:text-blue-300">Today</div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                {recentlyViewed.filter(item => getTimeCategory(item.viewedAt) === 'today').length}
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-blue-800 dark:text-blue-300">This Week</div>
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                {recentlyViewed.filter(item => getTimeCategory(item.viewedAt) === 'week').length}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Instructions */}
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">💡 How it works:</h3>
-        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-          <li>• Automatically tracks PIN codes you view across the app</li>
-          <li>• Items are grouped by when you viewed them (last hour, today, this week, older)</li>
-          <li>• Use the search bar to find specific recently viewed PIN codes</li>
-          <li>• Adjust the maximum number of items to keep in history</li>
-          <li>• Export your viewing history to CSV for analysis</li>
-          <li>• Click the trash icon to remove individual items</li>
-        </ul>
       </div>
-
-      {/* Demo Data Note */}
-      {recentlyViewed.length === 0 && (
-        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-          <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">💡 Demo: Add Sample Data</h3>
-          <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-            To see how this feature works, you can add some sample recently viewed items:
-          </p>
-          <button
-            onClick={() => {
-              const sampleData = [
-                { pincode: '110001', officeName: 'Connaught Place', district: 'New Delhi', state: 'Delhi', taluk: 'New Delhi' },
-                { pincode: '400001', officeName: 'Fort', district: 'Mumbai', state: 'Maharashtra', taluk: 'Mumbai' },
-                { pincode: '700001', officeName: 'BBD Bagh', district: 'Kolkata', state: 'West Bengal', taluk: 'Kolkata' },
-                { pincode: '560001', officeName: 'Dr. B.R. Ambedkar Veedhi', district: 'Bangalore', state: 'Karnataka', taluk: 'Bangalore' }
-              ];
-
-              sampleData.forEach((item, index) => {
-                setTimeout(() => {
-                  addToRecentlyViewed(item);
-                }, index * 100);
-              });
-
-              toast.success('Added sample recently viewed items');
-            }}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
-          >
-            Add Sample Data
-          </button>
-        </div>
-      )}
     </div>
   );
 };

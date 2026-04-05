@@ -90,10 +90,13 @@ const DataTable = ({
               <thead className="bg-slate-50 text-slate-500 dark:bg-slate-950/60 dark:text-slate-300">
                 <tr>
                   {[
+                    { key: 'officeName', label: 'Office Name' },
                     { key: 'pincode', label: 'PIN code' },
-                    { key: 'officeName', label: 'Office' },
                     { key: 'officeType', label: 'Type' },
-                    { key: 'deliveryStatus', label: 'Delivery' },
+                    { key: 'deliveryStatus', label: 'Delivery Status' },
+                    { key: 'divisionName', label: 'Division' },
+                    { key: 'regionName', label: 'Region' },
+                    { key: 'circleName', label: 'Circle' },
                     { key: 'taluk', label: 'Taluk' },
                     { key: 'district', label: 'District' },
                     { key: 'state', label: 'State' },
@@ -118,10 +121,13 @@ const DataTable = ({
                     onClick={() => onRowClick(row)}
                     className="border-t border-slate-200 bg-white transition hover:bg-indigo-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900/80"
                   >
-                    <td className="whitespace-nowrap px-4 py-4 font-medium">{row.pincode}</td>
-                    <td className="whitespace-nowrap px-4 py-4">{row.officeName}</td>
+                    <td className="whitespace-nowrap px-4 py-4 font-medium">{row.officeName}</td>
+                    <td className="whitespace-nowrap px-4 py-4">{row.pincode}</td>
                     <td className="whitespace-nowrap px-4 py-4">{row.officeType}</td>
                     <td className="whitespace-nowrap px-4 py-4">{row.deliveryStatus}</td>
+                    <td className="whitespace-nowrap px-4 py-4">{row.divisionName || '-'}</td>
+                    <td className="whitespace-nowrap px-4 py-4">{row.regionName || '-'}</td>
+                    <td className="whitespace-nowrap px-4 py-4">{row.circleName || '-'}</td>
                     <td className="whitespace-nowrap px-4 py-4">{row.taluk}</td>
                     <td className="whitespace-nowrap px-4 py-4">{row.district}</td>
                     <td className="whitespace-nowrap px-4 py-4">{row.state}</td>

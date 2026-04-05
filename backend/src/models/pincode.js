@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 
 const pincodeSchema = new mongoose.Schema({
   pincode: {
-    type: String,
+    type: Number,
     required: true,
-    index: true,
-    trim: true
+    index: true
   },
   officeName: {
     type: String,
@@ -34,19 +33,27 @@ const pincodeSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  /* 
+     NOTICE: The MongoDB Atlas database has field names with a massive number of trailing spaces. 
+     Fields like stateName are exactly 48 chars long. These must match perfectly.
+  */
+  /* 
+     NOTICE: The MongoDB Atlas database has field names with a massive number of trailing spaces. 
+     Fields like stateName are exactly 48 chars long. These must match perfectly.
+  */
   taluk: {
     type: String,
     required: true,
     index: true,
     trim: true
   },
-  district: {
+  districtName: {
     type: String,
     required: true,
     index: true,
     trim: true
   },
-  state: {
+  "stateName                                       ": {
     type: String,
     required: true,
     index: true,
@@ -70,8 +77,8 @@ const pincodeSchema = new mongoose.Schema({
 });
 
 // Compound indexes for faster queries
-pincodeSchema.index({ state: 1, district: 1 });
-pincodeSchema.index({ state: 1, district: 1, taluk: 1 });
-pincodeSchema.index({ officeName: 'text', taluk: 'text', district: 'text' });
+pincodeSchema.index({ "stateName                                       ": 1, districtName: 1 });
+pincodeSchema.index({ "stateName                                       ": 1, districtName: 1, taluk: 1 });
+pincodeSchema.index({ officeName: 'text', taluk: 'text', districtName: 'text' });
 
 module.exports = mongoose.model('Pincode', pincodeSchema);

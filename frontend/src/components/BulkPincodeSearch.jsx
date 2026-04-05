@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Download, Copy, Check } from 'lucide-react';
+import { Search, Download, Copy, Check, Layers, Zap, FileSpreadsheet, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const BulkPincodeSearch = () => {
   const { darkMode } = useTheme();
@@ -11,254 +13,128 @@ const BulkPincodeSearch = () => {
   const [copiedText, setCopiedText] = useState(null);
 
   const parsePincodes = (text) => {
-    // Split by comma, newline, space, or semicolon
     const pincodes = text
       .split(/[,\n\s;]+/)
       .map(pin => pin.trim())
       .filter(pin => pin.length > 0 && /^\d{6}$/.test(pin));
-
-    return [...new Set(pincodes)]; // Remove duplicates
+    return [...new Set(pincodes)];
   };
 
   const handleSearch = async () => {
     const pincodes = parsePincodes(inputText);
-
     if (pincodes.length === 0) {
-      toast.error('Please enter valid PIN codes');
+      toast.error('Invalid input matrix');
       return;
     }
-
     if (pincodes.length > 50) {
-      toast.error('Maximum 50 PIN codes allowed at once');
+      toast.error('Queue limit: 50 nodes');
       return;
     }
-
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/bulk-search', {
+      const response = await fetch(`${API_URL}/bulk-search`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pincodes }),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setResults(data.results);
-        toast.success(`Found ${data.totalFound} out of ${data.totalRequested} PIN codes`);
-      } else {
-        toast.error('Search failed');
+        toast.success(`Matrix sync: ${data.totalFound}/${data.totalRequested} nodes`);
       }
     } catch (error) {
-      console.error('Bulk search error:', error);
-      toast.error('Failed to search PIN codes');
+      toast.error('Sync failure');
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopiedText(text);
-    setTimeout(() => setCopiedText(null), 2000);
-    toast.success('Copied to clipboard!');
-  };
-
   const exportToCSV = () => {
     const foundResults = results.filter(r => r.found);
-    if (foundResults.length === 0) {
-      toast.error('No data to export');
-      return;
-    }
-
+    if (foundResults.length === 0) return;
     const csvData = [
-      ['PIN Code', 'Post Office', 'Type', 'Status', 'Taluk', 'District', 'State', 'Division', 'Region'],
-      ...foundResults.map(r => [
-        r.pincode,
-        r.data.officeName,
-        r.data.officeType,
-        r.data.deliveryStatus,
-        r.data.taluk,
-        r.data.district,
-        r.data.state,
-        r.data.divisionName,
-        r.data.regionName
-      ])
+      ['PIN Code', 'Post Office', 'Type', 'Status', 'Taluk', 'District', 'State'],
+      ...foundResults.map(r => [r.pincode, r.data.officeName, r.data.officeType, r.data.deliveryStatus, r.data.taluk, r.data.district, r.data.state])
     ];
-
     const csvContent = csvData.map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bulk_pincode_search_${Date.now()}.csv`;
+    a.download = `bulk_nodes_${Date.now()}.csv`;
     a.click();
-    window.URL.revokeObjectURL(url);
-    toast.success('CSV exported successfully!');
   };
 
-  const sampleData = "110001, 400001, 560001, 600001, 700001, 226001, 302001, 395001, 412001, 500001";
-
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg">
-      <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-        🔍 Bulk PIN Code Search
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Search multiple PIN codes at once (up to 50)
-      </p>
-
-      {/* Input Section */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Enter PIN codes (comma, space, or line separated):
-        </label>
-        <textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={`Example: ${sampleData}`}
-          className="w-full h-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          disabled={loading}
-        />
-        <div className="flex items-center justify-between mt-2">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {parsePincodes(inputText).length} PIN codes detected
+    <div className={`max-w-6xl mx-auto p-8 rounded-[2.5rem] border transition-all duration-500 ${darkMode ? 'bg-[#0b0d14] border-white/5 text-white' : 'bg-white border-gray-100 text-gray-900 shadow-2xl'}`}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold uppercase tracking-widest mb-4">
+            <Layers className="w-4 h-4" /> Bulk Sync Engine v2.0
           </div>
-          <button
-            onClick={() => setInputText(sampleData)}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Load Sample Data
-          </button>
+          <h1 className="text-4xl font-black tracking-tight mb-2">Node <span className="text-emerald-500">Discovery</span></h1>
+          <p className="font-medium opacity-50">Ingest multiple pincodes for parallel data retrieval and csv export</p>
         </div>
-      </div>
-
-      {/* Search Button */}
-      <div className="mb-6">
-        <button
-          onClick={handleSearch}
-          disabled={loading || parsePincodes(inputText).length === 0}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Searching...
-            </>
-          ) : (
-            <>
-              <Search className="h-4 w-4" />
-              Search PIN Codes
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* Results Section */}
-      {results.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Search Results ({results.filter(r => r.found).length} found)
-            </h2>
-            <button
-              onClick={exportToCSV}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export CSV
+        <div className="flex gap-4">
+            {results.length > 0 && (
+                <button onClick={exportToCSV} className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20">
+                    <FileSpreadsheet className="w-5 h-5" /> Export Matrix
+                </button>
+            )}
+            <button onClick={() => {setInputText(''); setResults([]);}} className={`p-3 rounded-2xl border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                <Trash2 className="w-5 h-5 opacity-50" />
             </button>
-          </div>
-
-          <div className="grid gap-4">
-            {results.map((result) => (
-              <div
-                key={result.pincode}
-                className={`p-4 rounded-lg border ${
-                  result.found
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        result.found
-                          ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200'
-                          : 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200'
-                      }`}>
-                        {result.found ? '✓ Found' : '✗ Not Found'}
-                      </span>
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">
-                        {result.pincode}
-                      </span>
-                    </div>
-
-                    {result.found && result.data && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Post Office:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{result.data.officeName}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Type:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{result.data.officeType}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Status:</span>
-                          <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
-                            result.data.deliveryStatus === 'Delivery'
-                              ? 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
-                              : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
-                          }`}>
-                            {result.data.deliveryStatus}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">District:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{result.data.district}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">State:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{result.data.state}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-300">Division:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{result.data.divisionName}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {result.found && (
-                    <button
-                      onClick={() => copyToClipboard(result.pincode)}
-                      className="ml-4 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                      title="Copy PIN code"
-                    >
-                      {copiedText === result.pincode ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
-      )}
+      </div>
 
-      {/* Instructions */}
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">📝 Instructions:</h3>
-        <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-          <li>• Enter PIN codes separated by commas, spaces, or new lines</li>
-          <li>• Maximum 50 PIN codes per search</li>
-          <li>• Only 6-digit PIN codes are accepted</li>
-          <li>• Duplicates are automatically removed</li>
-          <li>• Results show found/not found status for each PIN code</li>
-        </ul>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Input area */}
+        <div className="lg:col-span-4 space-y-6">
+            <div className={`p-6 rounded-[2rem] border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                <label className="block text-xs font-black uppercase tracking-widest text-emerald-500 mb-4">Input Matrix</label>
+                <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="110001, 400001, 560001..."
+                    className={`w-full h-64 p-4 rounded-2xl border-none focus:ring-0 resize-none font-mono text-sm ${darkMode ? 'bg-black/20' : 'bg-white'}`}
+                />
+                <div className="mt-4 flex justify-between items-center">
+                    <span className="text-xs font-bold opacity-40">{parsePincodes(inputText).length} Nodes Detected</span>
+                    <button onClick={handleSearch} disabled={loading || !inputText} className="bg-emerald-500 p-3 rounded-xl text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-30">
+                        {loading ? <Zap className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {/* Results area */}
+        <div className="lg:col-span-8 flex flex-col min-h-[400px]">
+            {results.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full content-start">
+                    {results.map((r, i) => (
+                        <div key={i} className={`p-5 rounded-2xl border transition-all ${r.found ? (darkMode ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100') : (darkMode ? 'bg-rose-500/5 border-rose-500/20 opacity-50' : 'bg-rose-50 border-rose-100')}`}>
+                            <div className="flex justify-between items-start mb-3">
+                                <span className={`text-2xl font-black ${r.found ? 'text-emerald-500' : 'text-rose-500'}`}>{r.pincode}</span>
+                                {r.found && <Check className="w-4 h-4 text-emerald-500" />}
+                            </div>
+                            {r.found ? (
+                                <div className="space-y-1">
+                                    <div className="font-bold truncate">{r.data.officeName}</div>
+                                    <div className="text-[10px] font-black uppercase opacity-40 tracking-wider font-mono">{r.data.district}, {r.data.state}</div>
+                                </div>
+                            ) : (
+                                <div className="text-[10px] font-black uppercase opacity-40 tracking-wider">Node not indexed</div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="flex-1 flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-gray-500/20 rounded-[2.5rem]">
+                    <Layers className="w-16 h-16 mb-4" />
+                    <p className="font-black uppercase tracking-[0.4em]">Awaiting Ingestion</p>
+                </div>
+            )}
+        </div>
       </div>
     </div>
   );

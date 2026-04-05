@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash.debounce';
 import { useTheme } from '../context/ThemeContext';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Explore = () => {
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ const Explore = () => {
 
   useEffect(() => {
     fetchStates();
+    fetchPincodeData();
     loadFavorites();
   }, []);
 
@@ -65,10 +66,8 @@ const Explore = () => {
   }, [selectedState, selectedDistrict]);
 
   useEffect(() => {
-    if (selectedState || selectedDistrict || selectedTaluk) {
-      setCurrentPage(1);
-      fetchPincodeData();
-    }
+    setCurrentPage(1);
+    fetchPincodeData();
   }, [selectedState, selectedDistrict, selectedTaluk]);
 
   useEffect(() => {
@@ -167,7 +166,43 @@ const Explore = () => {
     setSearchQuery('');
   };
 
-  const handleExport = async () => {
+  const handleExportCurrentPage = () => {
+    if (pincodeData.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+    
+    try {
+      const headers = ['PIN Code', 'Office Name', 'Type', 'Taluk', 'District', 'State', 'Delivery Status'];
+      const csvContent = [
+        headers.join(','),
+        ...pincodeData.map(item => [
+          item.pincode,
+          `"${item.officeName || ''}"`,
+          `"${item.officeType || ''}"`,
+          `"${item.Taluk || ''}"`,
+          `"${item.districtName || ''}"`,
+          `"${item.stateName || ''}"`,
+          `"${item.deliveryStatus || ''}"`
+        ].join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pincode_page_${currentPage}_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Page exported to CSV successfully');
+    } catch (error) {
+      toast.error('Failed to export page');
+      console.error(error);
+    }
+  };
+
+  const handleExportAll = async () => {
     setExporting(true);
     try {
       const params = new URLSearchParams();
@@ -182,15 +217,15 @@ const Explore = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `pincodes_${Date.now()}.csv`);
+      link.setAttribute('download', `pincodes_full_${Date.now()}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      toast.success('Export completed successfully');
+      toast.success('Full Data Export completed successfully');
     } catch (error) {
-      toast.error('Export failed');
+      toast.error('Export failed. Backend might need a restart.');
     } finally {
       setExporting(false);
     }
@@ -281,7 +316,7 @@ const Explore = () => {
               >
                 <div className={`font-semibold ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{result.pincode}</div>
                 <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{result.officeName}</div>
-                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{result.taluk}, {result.district}, {result.state}</div>
+                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{result.Taluk}, {result.districtName}, {result.stateName}</div>
               </div>
             ))}
           </div>
@@ -373,23 +408,33 @@ const Explore = () => {
         </div>
       </div>
 
-      {/* Export Button */}
+      {/* Export Buttons */}
       <div className="flex justify-between items-center gap-3">
         <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
           {total > 0 ? `${total.toLocaleString()} PIN codes available` : 'Select filters to view data'}
         </div>
-        <button
-          onClick={handleExport}
-          disabled={exporting || pincodeData.length === 0}
-          className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md"
-        >
-          {exporting ? (
-            <Loader className="h-4 w-4 animate-spin" />
-          ) : (
+        <div className="flex gap-3">
+          <button
+            onClick={handleExportCurrentPage}
+            disabled={pincodeData.length === 0}
+            className="flex items-center space-x-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md"
+          >
             <Download className="h-4 w-4" />
-          )}
-          <span>{exporting ? 'Exporting...' : 'Export CSV'}</span>
-        </button>
+            <span>Export Page CSV</span>
+          </button>
+          <button
+            onClick={handleExportAll}
+            disabled={exporting || total === 0}
+            className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-md"
+          >
+            {exporting ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span>{exporting ? 'Exporting...' : 'Export All Full CSV'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Data Table */}
@@ -447,9 +492,9 @@ const Explore = () => {
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{item.pincode}</td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-900'}`}>{item.officeName}</td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.officeType}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.taluk}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.district}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.state}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.Taluk}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.districtName}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.stateName}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         item.deliveryStatus === 'Delivery' 

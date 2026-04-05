@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Favorites = () => {
   const { darkMode } = useTheme();

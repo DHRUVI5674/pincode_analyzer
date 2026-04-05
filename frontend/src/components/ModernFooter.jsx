@@ -1,133 +1,123 @@
 import React from 'react';
+import { Globe, MessageCircle, Briefcase, Mail, MapPin, ExternalLink, ShieldCheck, Cpu, Terminal as TerminalIcon, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapPin, ExternalLink, Mail, Phone, ArrowRight } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const ModernFooter = () => {
-  const { darkMode } = useTheme();
-  const currentYear = new Date().getFullYear();
+    const { darkMode } = useTheme();
+    const currentYear = new Date().getFullYear();
 
-  const footerLinks = {
-    Product: [
-      { label: 'Explore', href: '/explore' },
-      { label: 'Analytics', href: '/analytics' },
-      { label: 'Favorites', href: '/favorites' },
-      { label: 'Nearby', href: '/nearby' },
-    ],
-    Company: [
-      { label: 'About Us', href: '/about' },
-      { label: 'Contact', href: '#contact' },
-      { label: 'Privacy Policy', href: '#privacy' },
-      { label: 'Terms of Service', href: '#terms' },
-    ],
-    Resources: [
-      { label: 'Documentation', href: '#docs' },
-      { label: 'API Guide', href: '#api' },
-      { label: 'Blog', href: '#blog' },
-      { label: 'Support', href: '#support' },
-    ],
-  };
-
-  const socialLinks = [
-    { icon: ExternalLink, label: 'GitHub', href: '#github' },
-    { icon: ExternalLink, label: 'Twitter', href: '#twitter' },
-    { icon: ExternalLink, label: 'LinkedIn', href: '#linkedin' },
-    { icon: Mail, label: 'Email', href: 'mailto:info@pincodeindia.com' },
-  ];
-
-  return (
-    <footer className="bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300 mt-16">
-      <div className="container mx-auto px-4 py-12">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Brand Section */}
-          <div className="md:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4 group">
-              <div className="p-2 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg group-hover:shadow-lg group-hover:shadow-indigo-500/50 transition-all duration-300">
-                <MapPin className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                PINCode India
-              </span>
+    return (
+        <footer className={`relative border-t py-20 overflow-hidden ${darkMode ? 'bg-[#020408] border-[var(--neon-cyan)]/20 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
+            <div className="scanline opacity-5"></div>
+            <div className="absolute top-0 right-0 p-8 flex flex-col items-end opacity-5 font-mono text-[8px] pointer-events-none">
+                <span>ENCRYPT_SEC_V4.2</span>
+                <span>DATA_STREAM_ALPHA</span>
+                <span>SYS_INIT_COMPLETE</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Your comprehensive guide to Indian postal codes. Fast, accurate, and free.
-            </p>
-            <div className="flex gap-3">
-              {socialLinks.map(({ icon: Icon, label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  title={label}
-                  className="p-2.5 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300 hover:scale-110"
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+                    
+                    {/* Brand HUD */}
+                    <div className="space-y-8">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg border flex items-center justify-center ${darkMode ? 'border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/5' : 'bg-indigo-100 border-indigo-200'}`}>
+                                <Cpu className={`w-5 h-5 ${darkMode ? 'text-[var(--neon-cyan)] animate-pulse-cyan' : 'text-indigo-600'}`} />
+                            </div>
+                            <span className="text-xl font-black tracking-tighter">NEXUS <span className={darkMode ? 'text-[var(--neon-cyan)]' : 'text-indigo-600'}>OS</span></span>
+                        </div>
+                        <p className="text-xs font-bold opacity-40 uppercase tracking-[0.2em] leading-relaxed">
+                            A high-precision logistics intelligence matrix for domestic distribution analysis.
+                        </p>
+                        <div className="flex items-center gap-4">
+                            {[
+                                { Icon: Globe, label: 'Website' },
+                                { Icon: Send, label: 'Social' },
+                                { Icon: Briefcase, label: 'Work' },
+                                { Icon: Mail, label: 'Email' }
+                            ].map(({ Icon, label }, i) => (
+                                <a key={i} href="#" aria-label={label} className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${darkMode ? 'border-white/10 hover:border-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]' : 'bg-white border-gray-200 hover:border-indigo-400 text-indigo-600'}`}>
+                                    <Icon className="w-4 h-4" />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Navigation HUD */}
+                    <div>
+                        <h4 className="text-[10px] font-mono font-black opacity-30 tracking-[0.4em] uppercase mb-10">CORE_MODULES</h4>
+                        <ul className="space-y-4">
+                            {[
+                                { name: 'Terminal Home', path: '/' },
+                                { name: 'Geo Scan', path: '/explore' },
+                                { name: 'System Metrics', path: '/analytics' },
+                                { name: 'Tactical Maps', path: '/map-integration' }
+                            ].map((link, i) => (
+                                <li key={i}>
+                                    <Link to={link.path} className="group flex items-center gap-3 text-xs font-black uppercase tracking-widest opacity-60 hover:opacity-100 hover:text-[var(--neon-cyan)] transition-all">
+                                        <div className="w-1 h-1 bg-[var(--neon-cyan)] opacity-0 group-hover:opacity-100" />
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Technical HUD */}
+                    <div>
+                        <h4 className="text-[10px] font-mono font-black opacity-30 tracking-[0.4em] uppercase mb-10">DATA_VECTORS</h4>
+                        <ul className="space-y-4">
+                            {[
+                                { name: 'Bulk matrix', path: '/bulk-search' },
+                                { name: 'Vector Route', path: '/delivery-estimator' },
+                                { name: 'Node parity', path: '/comparison' },
+                                { name: 'Secure Nodes', path: '/favorites-system' }
+                            ].map((link, i) => (
+                                <li key={i}>
+                                    <Link to={link.path} className="group flex items-center gap-3 text-xs font-black uppercase tracking-widest opacity-60 hover:opacity-100 hover:text-[var(--neon-rose)] transition-all">
+                                        <div className="w-1 h-1 bg-[var(--neon-rose)] opacity-0 group-hover:opacity-100" />
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* System Status HUD */}
+                    <div className="hud-module p-8 rounded-2xl border-white/5 bg-white/5">
+                        <div className="hud-bracket hud-bracket-tl opacity-20"></div>
+                        <div className="hud-bracket hud-bracket-br opacity-20"></div>
+                        
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                            <span className="text-[10px] font-mono font-black text-emerald-500 tracking-widest uppercase">UPTIME_ACTIVE</span>
+                        </div>
+                        <div className="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] mb-4">UPLINK_A32.9_STABLE</div>
+                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div className="w-3/4 h-full bg-[var(--neon-cyan)] animate-pulse-cyan"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Final Trace */}
+                <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 font-mono text-[10px]">
+                    <div className="text-xs font-black tracking-tighter opacity-20">
+                         © {currentYear} NEXUS_OS // LOGISTICS_INTELLIGENCE_CORE
+                    </div>
+                    <div className="flex items-center gap-8 opacity-40">
+                        <a href="#" className="hover:text-[var(--neon-cyan)] transition-colors">PRIVACY_PROTO</a>
+                        <a href="#" className="hover:text-[var(--neon-cyan)] transition-colors">SYS_TERMS</a>
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>NODE_SECURE</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          {/* Footer Links */}
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                {category}
-              </h3>
-              <ul className="space-y-2">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link
-                      to={href}
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300 flex items-center gap-1 group"
-                    >
-                      {label}
-                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700 mb-8" />
-
-        {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Newsletter Signup */}
-          <div className="w-full md:w-auto">
-            <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-              Stay updated with latest PIN code data
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
-              />
-              <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-indigo-500/50 transition-all duration-300 whitespace-nowrap">
-                Subscribe
-              </button>
-            </div>
-          </div>
-
-          {/* Copyright & Version */}
-          <div className="text-center md:text-right">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              © {currentYear} PINCode India. All rights reserved.
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              v1.0 • Made with ❤️ for India
-            </p>
-          </div>
-        </div>
-
-        {/* Floating Elements */}
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-indigo-500/10 to-transparent dark:from-indigo-500/5 rounded-full -z-10 blur-3xl pointer-events-none" />
-      </div>
-    </footer>
-  );
+        </footer>
+    );
 };
 
 export default ModernFooter;

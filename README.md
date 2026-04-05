@@ -1,134 +1,84 @@
-# pincode_analyzer# 📮 PIN Code Directory Application
+# Logistics Engine V2.0 – Pincode Analyzer
 
-A full-stack web application to search, explore, and manage Indian PIN codes with cascading filters, real-time search, analytics dashboard, and supplier features.
+![Dashboard Preview](file:///C:/Users/Patel%20Dhruvi/.gemini/antigravity/brain/f4b9b2b2-a4fb-4c8a-a20c-b39105e4fb31/section_1_metric_cards_1775373816618.png)
 
-## 🚀 Live Demo
-[Add your deployed URL here]
+A high-fidelity, premium web application built for visualizing and analyzing India's postal network dataset. It provides real-time geospatial insights, logistics routing simulations, and highly interactive data dashboards to track over 150,000+ branch and delivery offices nationwide.
 
-## ✨ Features
+---
 
-### Core Features
-- **Cascading Filters** - State → District → Taluk with instant updates
-- **Real-time Search** - Debounced search with auto-suggestions
-- **Data Table** - Sortable, paginated table (10/20/50/100 rows)
-- **PIN Code Details** - Complete information with map view
-- **Dashboard Analytics** - Stats cards, bar charts, pie charts
-- **Export Data** - Download filtered data as CSV
-- **Dark Mode** - Light/Dark theme toggle
-- **Responsive Design** - Mobile, tablet, desktop friendly
+## 🌟 Key Features
 
-### User Features
-- 🔍 Nearby PIN Code Finder
-- ⭐ Save Favorites
-- 📜 Recently Viewed History
-- 🗺️ Interactive Map Integration
-- 📱 PWA Support
+* **Advanced Data Dashboard:** Real-time metrics powered by Recharts (Donut, Radar, and Area charts) wrapped in a stunning glassmorphic UI.
+* **Geospatial Explore Mode:** Search and filter pincodes across States, Districts, and Taluks with live dropdown populating from MongoDB.
+* **Intelligent Auto-Complete:** Search logs, caching, and instant suggestions for over a hundred thousand locations.
+* **Delivery Routing Estimator:** Visual intra-state vs inter-state logistic simulation.
+* **Integrated Contact System:** Form submissions connected smoothly via EmailJS.
+* **Responsive Dark & Light Themes:** Toggleable global aesthetics with dynamic UI elements.
 
-### Supplier Features
-- 📦 Serviceable PIN Code Checker
-- 💰 Shipping Rate Calculator
-- 📊 Search Trend Analytics
-- 🔑 API Key Management
+## 🛠 Tech Stack
 
-## 🛠️ Tech Stack
+* **Frontend:** React 19, Tailwind CSS (v4), Vite, Recharts, React Router, Lucide Icons
+* **Backend:** Node.js, Express.js, Mongoose
+* **Database:** MongoDB Atlas (Cloud NoSQL)
+* **Email System:** EmailJS
 
-| Category | Technology |
-|----------|------------|
-| Frontend | React 18, Vite, Tailwind CSS, React Router v6 |
-| State Management | React Query, Context API |
-| Charts | Recharts |
-| Maps | Leaflet |
-| Backend | Node.js, Express |
-| Database | MongoDB Atlas, Mongoose |
-| Auth | JWT, Bcrypt |
-| Security | Helmet, CORS, Rate Limit |
+---
 
-## 📁 Project Structure
-pincode-directory-app/
-├── backend/
-│ ├── models/
-│ │ ├── Pincode.js
-│ │ └── User.js
-│ ├── routes/
-│ │ ├── states.js
-│ │ ├── districts.js
-│ │ ├── taluks.js
-│ │ ├── pincodes.js
-│ │ ├── search.js
-│ │ ├── stats.js
-│ │ └── export.js
-│ ├── controllers/
-│ ├── middleware/
-│ ├── server.js
-│ └── package.json
-├── frontend/
-│ ├── src/
-│ │ ├── components/
-│ │ ├── pages/
-│ │ ├── hooks/
-│ │ ├── services/
-│ │ ├── App.jsx
-│ │ └── main.jsx
-│ ├── index.html
-│ └── package.json
-└── README.md
+## 🚀 Deployment Guide
 
-text
+This repository is strictly configured to be deployed as two separate web services. Follow these instructions carefully:
 
-## 🚀 Installation
+### 1. Deploying the Backend (API Server)
+**Recommended Platform:** [Render](https://render.com) or [Railway](https://railway.app)
 
-### Prerequisites
-- Node.js v16+
-- MongoDB Atlas account
+1. Create a new **Web Service** on Render.
+2. Link your GitHub repository and point the **Root Directory** to `backend`.
+3. Build Command: `npm install`
+4. Start Command: `npm start`
+5. **CRITICAL ENVIRONMENT VARIABLES:**
+   * `MONGODB_URI` = your complete MongoDB Atlas connection string.
+   * `PORT` = `5000`
+   * `NODE_ENV` = `production`
+6. Once deployed, copy your absolute backend URL.
 
-### Step 1: Clone Repository
+Alternatively, for **Vercel** deployment, native `vercel.json` files have been automatically provided in the `backend` folder. Make sure your serverless entry points are correctly mapped!
+
+### 2. Deploying the Frontend (React App)
+**Recommended Platform:** [Vercel](https://vercel.com) or [Netlify](https://netlify.com)
+
+1. Create a new **Project** on Vercel.
+2. Import your GitHub repository and point the **Root Directory** to `frontend`.
+3. Vercel should auto-detect Vite. Leave Build/Install commands as default (`npm run build`).
+4. **CRITICAL ENVIRONMENT VARIABLES:**
+   * `VITE_API_URL` = Paste the backend completely qualified URL deployed from the previous step! (Ensure there is NO trailing slash, e.g. `https://your-backend-url.onrender.com/api`)
+   * `VITE_EMAILJS_SERVICE_ID` = `service_vehl12p`
+   * `VITE_EMAILJS_TEMPLATE_ID` = `service_vehl12p`
+   * `VITE_EMAILJS_PUBLIC_KEY` = `QKFS18dSWKVZLrE8g`
+5. The frontend ships with a configured `vercel.json` providing strict SPA rewrites so routing resolves correctly.
+
+---
+
+## 💻 Local Development Setup
+
+To run everything locally simultaneously:
+
+**Terminal 1 — Backend:**
 ```bash
-git clone https://github.com/yourusername/pincode-directory-app.git
-cd pincode-directory-app
-Step 2: Backend Setup
-bash
 cd backend
 npm install
-npm install express mongoose cors dotenv helmet morgan compression bcryptjs jsonwebtoken express-rate-limit
-npm install -D nodemon
-Step 3: Frontend Setup
-bash
-cd ../frontend
-npm install
-npm install axios react-router-dom react-query react-hot-toast recharts react-select leaflet react-leaflet lucide-react
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-Step 4: Environment Variables
-Backend (.env)
-
-env
-PORT=5000
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/pincodedb
-JWT_SECRET=your_super_secret_key
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:5173
-Frontend (.env)
-
-env
-VITE_API_URL=http://localhost:5000/api
-🗄️ MongoDB Indexes
-Run in MongoDB Compass or shell:
-
-javascript
-db.pincodes.createIndex({ state: 1 })
-db.pincodes.createIndex({ district: 1 })
-db.pincodes.createIndex({ taluk: 1 })
-db.pincodes.createIndex({ pincode: 1 })
-db.pincodes.createIndex({ state: 1, district: 1 })
-db.pincodes.createIndex({ state: 1, district: 1, taluk: 1 })
-🏃 Running the Application
-Terminal 1 - Backend
-bash
-cd backend
 npm run dev
-# Runs on http://localhost:5000
-Terminal 2 - Frontend
-bash
+```
+*(Server opens on `http://localhost:5000`)*
+
+**Terminal 2 — Frontend:**
+```bash
 cd frontend
+npm install
 npm run dev
-# Runs on http://localhost:5173
+```
+*(Client opens on `http://localhost:5173`)*
+
+*Ensure your local `.env` files mimic the necessary variables required for production mapping!*
+
+---
+© 2026 NEXUS OS — Built for precision intelligence.

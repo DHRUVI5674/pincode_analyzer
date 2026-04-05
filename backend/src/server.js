@@ -1,9 +1,9 @@
 const dotenv = require('dotenv');
+dotenv.config(); // Must be first — loads MONGODB_URI before anything else
+
 const connectDB = require('./config/database');
 const app = require('./app');
 const Pincode = require('./models/pincode');
-
-dotenv.config();
 
 const startServer = async () => {
   try {

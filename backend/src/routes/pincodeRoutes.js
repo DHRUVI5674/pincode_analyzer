@@ -26,7 +26,7 @@ router.post('/bulk-search', controller.bulkSearchPincodes);
 router.get('/address-autofill/:pincode', controller.addressAutofill);
 router.get('/delivery-estimate', controller.getDeliveryEstimate);
 router.get('/map-data', controller.getMapData);
-router.post('/compare-pincodes', controller.comparePincodes);
+router.get('/compare-pincodes', controller.comparePincodes);
 router.get('/print-label/:pincode', controller.printLabelData);
 router.get('/export', controller.exportCsv);
 router.get('/thresholds', controller.getThresholds);

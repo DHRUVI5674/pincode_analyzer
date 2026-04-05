@@ -44,16 +44,7 @@ export const getStates = async () => {
 export const getDistricts = async (state) => {
   try {
     if (!state) {
-      const states = await getStates();
-      const districtLists = await Promise.all(states.map(async (currentState) => {
-        try {
-          const url = `${API_BASE_URL}/states/${encodeURIComponent(currentState)}/districts`;
-          return await request(url);
-        } catch {
-          return [];
-        }
-      }));
-      return Array.from(new Set(districtLists.flat().filter(Boolean))).sort();
+      return [];
     }
 
     console.log(`Fetching districts for state: ${state}`);
@@ -62,7 +53,7 @@ export const getDistricts = async (state) => {
     console.log(`Found ${response.length} districts for state ${state}`);
     return response;
   } catch (error) {
-    console.error(`Error fetching districts for ${state || 'all states'}:`, error);
+    console.error(`Error fetching districts for ${state}:`, error);
     throw error;
   }
 };
@@ -70,34 +61,8 @@ export const getDistricts = async (state) => {
 // TALUKS API
 export const getTaluks = async (state, district) => {
   try {
-    if (!state && !district) {
+    if (!state || !district) {
       return [];
-    }
-
-    if (!state && district) {
-      const states = await getStates();
-      const talukLists = await Promise.all(states.map(async (currentState) => {
-        try {
-          const url = `${API_BASE_URL}/states/${encodeURIComponent(currentState)}/districts/${encodeURIComponent(district)}/taluks`;
-          return await request(url);
-        } catch {
-          return [];
-        }
-      }));
-      return Array.from(new Set(talukLists.flat().filter(Boolean))).sort();
-    }
-
-    if (!district) {
-      const districts = await getDistricts(state);
-      const talukLists = await Promise.all(districts.map(async (currentDistrict) => {
-        try {
-          const url = `${API_BASE_URL}/states/${encodeURIComponent(state)}/districts/${encodeURIComponent(currentDistrict)}/taluks`;
-          return await request(url);
-        } catch {
-          return [];
-        }
-      }));
-      return Array.from(new Set(talukLists.flat().filter(Boolean))).sort();
     }
 
     console.log(`Fetching taluks for state: ${state}, district: ${district}`);
@@ -106,7 +71,7 @@ export const getTaluks = async (state, district) => {
     console.log(`Found ${response.length} taluks`);
     return response;
   } catch (error) {
-    console.error(`Error fetching taluks for ${state || 'all states'}/${district || 'all districts'}:`, error);
+    console.error(`Error fetching taluks for ${state}/${district}:`, error);
     throw error;
   }
 };

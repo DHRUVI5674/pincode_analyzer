@@ -6,7 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const PincodeDetail = () => {
   const { pincode } = useParams();
@@ -189,16 +189,16 @@ const PincodeDetail = () => {
           <MapPin className="h-16 w-16 mx-auto mb-4 text-indigo-200" />
           <h1 className="text-5xl font-bold mb-3">{details.pincode}</h1>
           <p className="text-xl text-indigo-100 font-semibold">{details.officeName}</p>
-          <p className="text-sm text-indigo-200 mt-2">{details.taluk}, {details.district}, {details.state}</p>
+          <p className="text-sm text-indigo-200 mt-2">{details.Taluk}, {details.districtName}, {details.stateName}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <DetailCard icon={Building} title="Office Type" value={details.officeType} />
         <DetailCard icon={Truck} title="Delivery Status" value={details.deliveryStatus} />
-        <DetailCard icon={MapPin} title="Taluk" value={details.taluk} />
-        <DetailCard icon={MapPin} title="District" value={details.district} />
-        <DetailCard icon={MapPin} title="State" value={details.state} />
+        <DetailCard icon={MapPin} title="Taluk" value={details.Taluk} />
+        <DetailCard icon={MapPin} title="District" value={details.districtName} />
+        <DetailCard icon={MapPin} title="State" value={details.stateName} />
         <DetailCard icon={Globe} title="Country" value={details.country} />
         <DetailCard title="Division" value={details.divisionName} />
         <DetailCard title="Region" value={details.regionName} />

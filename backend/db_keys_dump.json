@@ -1,0 +1,24 @@
+{
+  "keys": [
+    "_id",
+    "officeName",
+    "pincode",
+    "officeType",
+    "deliveryStatus",
+    "divisionName",
+    "regionName",
+    "circleName",
+    "taluk",
+    "districtName",
+    "stateName                                       "
+  ],
+  "stateClean": [
+    null
+  ],
+  "stateMess": [
+    null
+  ],
+  "stateNative": [
+    null
+  ]
+}

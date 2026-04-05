@@ -1,328 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { Search, MapPin, Navigation, ScanLine, RotateCcw, Zap, Globe, ChevronRight } from 'lucide-react';
+import PincodeAutocomplete from './PincodeAutocomplete';
 import toast from 'react-hot-toast';
-import { MapPin, Navigation, Search, Loader, RefreshCw } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-// Fix for default markers in react-leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Custom icon for user location
-const userLocationIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-// Component to fit map bounds
-function FitBounds({ markers, center, radius }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (markers.length > 0) {
-      const bounds = L.latLngBounds(markers.map(marker => [marker.latitude, marker.longitude]));
-      // Include center point in bounds
-      bounds.extend([center.lat, center.lng]);
-      map.fitBounds(bounds, { padding: [20, 20] });
-    } else if (center) {
-      map.setView([center.lat, center.lng], 13);
-    }
-  }, [markers, center, radius, map]);
-
-  return null;
-}
-
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const NearbySearch = () => {
-  const { darkMode } = useTheme();
-  const [userLocation, setUserLocation] = useState(null);
-  const [nearbyPincodes, setNearbyPincodes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searching, setSearching] = useState(false);
-  const [radius, setRadius] = useState(10);
-  const [selectedPincode, setSelectedPincode] = useState(null);
-  const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]); // Center of India
+    const { darkMode } = useTheme();
+    const [selectedPincode, setSelectedPincode] = useState(null);
+    const [radius, setRadius] = useState(10);
+    const [nearbyResults, setNearbyResults] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-  // Get user's current location
-  const getCurrentLocation = () => {
-    setLoading(true);
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by this browser');
-      setLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-        setMapCenter([latitude, longitude]);
-        toast.success('Location found! Click search to find nearby PIN codes.');
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        toast.error('Unable to get your location. Please check permissions.');
-        setLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
-    );
-  };
-
-  // Search for nearby PIN codes
-  const searchNearbyPincodes = async () => {
-    if (!userLocation) {
-      toast.error('Please get your location first');
-      return;
-    }
-
-    setSearching(true);
-    try {
-      const response = await axios.get(`${API_URL}/nearby`, {
-        params: {
-          lat: userLocation.lat,
-          lng: userLocation.lng,
-          radius: radius
+    const handleSearch = async () => {
+        if (!selectedPincode) {
+            toast.error('Select a central node for proximity radar');
+            return;
         }
-      });
 
-      setNearbyPincodes(response.data.data);
-      toast.success(`Found ${response.data.count} PIN codes within ${radius}km`);
-    } catch (error) {
-      toast.error('Failed to search nearby PIN codes');
-      console.error(error);
-    } finally {
-      setSearching(false);
-    }
-  };
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/nearby?lat=${selectedPincode.latitude}&lng=${selectedPincode.longitude}&radius=${radius}`);
+            const data = await response.json();
+            if (data.success) {
+                setNearbyResults(data.data);
+                toast.success(`Nodes discovered: ${data.data.length}`);
+            } else {
+                toast.error('Radar sweep failed');
+            }
+        } catch (error) {
+            toast.error('Proximity system offline');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleMarkerClick = (pincode) => {
-    setSelectedPincode(pincode);
-  };
+    const reset = () => {
+        setSelectedPincode(null);
+        setNearbyResults([]);
+        setRadius(10);
+    };
 
-  return (
-    <div className="w-full h-full">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-          Nearby PIN Code Search
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          Find PIN codes near your current location
-        </p>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-4">
-        <div className="flex flex-wrap gap-4 items-center mb-4">
-          <button
-            onClick={getCurrentLocation}
-            disabled={loading}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            {loading ? (
-              <Loader className="h-4 w-4 animate-spin" />
-            ) : (
-              <Navigation className="h-4 w-4" />
-            )}
-            <span>{loading ? 'Getting Location...' : 'Get My Location'}</span>
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Search Radius:
-            </label>
-            <select
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value={5}>5 km</option>
-              <option value={10}>10 km</option>
-              <option value={25}>25 km</option>
-              <option value={50}>50 km</option>
-              <option value={100}>100 km</option>
-            </select>
-          </div>
-
-          <button
-            onClick={searchNearbyPincodes}
-            disabled={!userLocation || searching}
-            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            {searching ? (
-              <Loader className="h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="h-4 w-4" />
-            )}
-            <span>{searching ? 'Searching...' : 'Search Nearby'}</span>
-          </button>
-
-          {userLocation && (
-            <button
-              onClick={() => setNearbyPincodes([])}
-              className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span>Clear Results</span>
-            </button>
-          )}
-        </div>
-
-        {userLocation && (
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            <p>
-              <strong>Your Location:</strong> {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-        <div className="h-96 w-full rounded-lg overflow-hidden mb-4">
-          <MapContainer
-            center={mapCenter}
-            zoom={userLocation ? 13 : 5}
-            style={{ height: '100%', width: '100%' }}
-            className="rounded-lg"
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-
-            {/* User location marker */}
-            {userLocation && (
-              <Marker
-                position={[userLocation.lat, userLocation.lng]}
-                icon={userLocationIcon}
-              >
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-bold text-lg text-red-600">Your Location</h3>
-                    <p className="text-sm">
-                      Lat: {userLocation.lat.toFixed(6)}<br />
-                      Lng: {userLocation.lng.toFixed(6)}
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            )}
-
-            {/* Search radius circle */}
-            {userLocation && nearbyPincodes.length > 0 && (
-              <Circle
-                center={[userLocation.lat, userLocation.lng]}
-                radius={radius * 1000} // Convert km to meters
-                pathOptions={{
-                  color: 'blue',
-                  fillColor: 'blue',
-                  fillOpacity: 0.1,
-                  weight: 2
-                }}
-              />
-            )}
-
-            {/* Nearby PIN code markers */}
-            {nearbyPincodes.map((pincode, index) => (
-              <Marker
-                key={`${pincode.pincode}-${index}`}
-                position={[pincode.latitude, pincode.longitude]}
-                eventHandlers={{
-                  click: () => handleMarkerClick(pincode),
-                }}
-              >
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-bold text-lg">{pincode.pincode}</h3>
-                    <p className="text-sm text-gray-600">{pincode.officeName}</p>
-                    <p className="text-sm">{pincode.district}, {pincode.state}</p>
-                    <p className="text-xs text-green-600 font-medium">
-                      Distance: {pincode.distance} km
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-
-            <FitBounds
-              markers={nearbyPincodes}
-              center={userLocation}
-              radius={radius}
-            />
-          </MapContainer>
-        </div>
-
-        {selectedPincode && (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h3 className="font-bold text-lg text-blue-800 dark:text-blue-200 mb-2">
-              Selected PIN Code: {selectedPincode.pincode}
-            </h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium">Office:</span> {selectedPincode.officeName}
-              </div>
-              <div>
-                <span className="font-medium">Type:</span> {selectedPincode.officeType}
-              </div>
-              <div>
-                <span className="font-medium">District:</span> {selectedPincode.district}
-              </div>
-              <div>
-                <span className="font-medium">State:</span> {selectedPincode.state}
-              </div>
-              <div>
-                <span className="font-medium">Distance:</span> {selectedPincode.distance} km
-              </div>
-              <div>
-                <span className="font-medium">Coordinates:</span> {selectedPincode.latitude.toFixed(4)}, {selectedPincode.longitude.toFixed(4)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {nearbyPincodes.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-bold text-lg mb-2">Nearby PIN Codes ({nearbyPincodes.length})</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
-              {nearbyPincodes.map((pincode, index) => (
-                <div
-                  key={`${pincode.pincode}-${index}`}
-                  className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  onClick={() => handleMarkerClick(pincode)}
-                >
-                  <div className="font-bold text-blue-600">{pincode.pincode}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">{pincode.officeName}</div>
-                  <div className="text-xs text-gray-500">{pincode.district}, {pincode.state}</div>
-                  <div className="text-xs text-green-600 font-medium">{pincode.distance} km away</div>
+    return (
+        <div className={`max-w-6xl mx-auto p-4 sm:p-10 rounded-[3.5rem] transition-all duration-700 overflow-hidden border ${darkMode ? 'bg-[#080b12] border-white/5 text-white' : 'bg-white border-gray-100 text-gray-900 shadow-2xl'}`}>
+            
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                        <ScanLine className="w-4 h-4" /> Proximity Radar v3.2
+                    </div>
+                    <h1 className="text-5xl font-black tracking-tighter mb-2">Nearby <span className="text-emerald-500">Discovery</span></h1>
+                    <p className="font-bold opacity-30 uppercase tracking-[0.3em] text-[10px]">Omni-directional logistics node mapping</p>
                 </div>
-              ))}
+                <div className="flex gap-4">
+                    <button onClick={handleSearch} disabled={loading || !selectedPincode} className="px-10 py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-3xl font-black transition-all hover:scale-105 shadow-xl shadow-emerald-500/20 active:scale-95 disabled:opacity-30">
+                        {loading ? <RotateCcw className="w-5 h-5 animate-spin" /> : 'Start Sweep'}
+                    </button>
+                </div>
             </div>
-          </div>
-        )}
 
-        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-          <p>
-            <strong>How to use:</strong> 1) Click "Get My Location" to detect your position. 2) Select search radius. 3) Click "Search Nearby" to find PIN codes in your area.
-          </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Search Settings */}
+                <div className="lg:col-span-4 space-y-8">
+                    <div className={`p-8 rounded-[2.5rem] border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-8 flex items-center gap-2">
+                             <Zap className="w-4 h-4" /> Radar Central
+                        </label>
+                        <PincodeAutocomplete onSelect={setSelectedPincode} placeholder="Search Focal PIN..." />
+                        
+                        <div className="mt-12">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Scan Distance</span>
+                                <span className="text-lg font-black text-emerald-500">{radius} KM</span>
+                            </div>
+                            <input 
+                                type="range" min="1" max="100" value={radius} onChange={e => setRadius(parseInt(e.target.value))}
+                                className="w-full h-2 bg-emerald-500/20 rounded-full appearance-none cursor-pointer accent-emerald-500"
+                            />
+                        </div>
+                    </div>
+
+                    {selectedPincode && (
+                        <div className={`p-8 rounded-[2.5rem] border ${darkMode ? 'bg-indigo-500/10 border-indigo-500/20 shadow-xl shadow-indigo-500/20' : 'bg-indigo-50 border-indigo-200'} animate-in fade-in slide-in-from-left-4`}>
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 mb-4">Central Hub Analysis</h4>
+                            <div className="text-3xl font-black mb-1">{selectedPincode.pincode}</div>
+                            <div className="text-xs font-bold opacity-60 uppercase">{selectedPincode.officeName}</div>
+                            <div className="mt-6 flex gap-2">
+                                <div className="px-3 py-1 rounded-full bg-black/10 text-[8px] font-black uppercase">{selectedPincode.district}</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Results Grid */}
+                <div className="lg:col-span-8">
+                    {nearbyResults.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {nearbyResults.map((node, i) => (
+                                <div key={i} className={`p-6 rounded-[2rem] border transition-all hover:translate-x-1 ${darkMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-md'}`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
+                                            <Navigation className="w-5 h-5" />
+                                        </div>
+                                        <div className="text-xl font-black text-emerald-500">+{node.distance} <span className="text-[10px] opacity-40">KM</span></div>
+                                    </div>
+                                    <div className="font-bold text-lg mb-1 truncate">{node.officeName}</div>
+                                    <div className="text-xs font-black opacity-30 uppercase tracking-widest">{node.pincode}</div>
+                                    <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                                        <span className="text-[9px] font-black uppercase opacity-40 hover:opacity-100 transition-all cursor-default">Target Node Sync Active</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-full min-h-[400px] rounded-[3.5rem] border-4 border-dashed border-black/5 dark:border-white/5 flex flex-col items-center justify-center p-12 text-center opacity-10">
+                            <ScanLine className="w-24 h-24 mb-6" />
+                            <p className="text-2xl font-black uppercase tracking-[1em]">Scanning Void</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default NearbySearch;

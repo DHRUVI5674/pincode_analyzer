@@ -1,9 +1,4 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+/* Components manage their own layout — no global #root constraints */
 
 .logo {
   height: 6em;

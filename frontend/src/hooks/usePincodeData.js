@@ -34,6 +34,7 @@ export const usePincodeData = () => {
   const districtsQuery = useQuery({
     queryKey: ['districts', filters.state],
     queryFn: () => getDistricts(filters.state),
+    enabled: Boolean(filters.state),
     staleTime: 1000 * 60 * 5,
     cacheTime: 1000 * 60 * 10,
   });
@@ -41,7 +42,7 @@ export const usePincodeData = () => {
   const taluksQuery = useQuery({
     queryKey: ['taluks', filters.state, filters.district],
     queryFn: () => getTaluks(filters.state, filters.district),
-    enabled: Boolean(filters.state || filters.district),
+    enabled: Boolean(filters.state && filters.district),
     staleTime: 1000 * 60 * 5,
     cacheTime: 1000 * 60 * 10,
   });
@@ -114,8 +115,12 @@ export const usePincodeData = () => {
     setSearchTerm,
     setSortConfig,
     clearFilters,
+    isLoadingStates: statesQuery.isFetching,
+    statesError: statesQuery.error,
     isLoadingDistricts: districtsQuery.isFetching,
+    districtsError: districtsQuery.error,
     isLoadingTaluks: taluksQuery.isFetching,
+    taluksError: taluksQuery.error,
   };
 };
 
