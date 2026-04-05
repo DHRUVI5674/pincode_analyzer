@@ -5,6 +5,8 @@ import { useTheme } from '../context/ThemeContext';
 
 import { API_BASE_URL as API_URL } from '../services/api';
 
+import PincodeAutocomplete from './PincodeAutocomplete';
+
 const AddressAutofillForm = () => {
   const { darkMode } = useTheme();
   const [formData, setFormData] = useState({
@@ -19,32 +21,38 @@ const AddressAutofillForm = () => {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const handlePincodeChange = async (e) => {
-    const pincode = e.target.value.replace(/\D/g, '').slice(0, 6);
-    setFormData(prev => ({ ...prev, pincode }));
-
-    if (pincode.length === 6) {
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_URL}/address-autofill/${pincode}`);
-        const data = await response.json();
-        if (data.success) {
-          setFormData(prev => ({
-            ...prev,
-            city: data.address.postOffice || '',
-            district: data.address.district || '',
-            state: data.address.state || ''
-          }));
-          toast.success('Smart lookup complete');
-        } else {
-            toast.error('Node not found');
-        }
-      } catch (error) {
-        toast.error('Lookup system offline');
-      } finally {
-        setLoading(false);
+  const performLookup = async (pincode) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/address-autofill/${pincode}`);
+      const data = await response.json();
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          pincode,
+          city: data.address.postOffice || data.address.taluk || '',
+          district: data.address.district || '',
+          state: data.address.state || ''
+        }));
+        toast.success('Smart lookup complete');
+      } else {
+        toast.error('Node not found');
       }
+    } catch (error) {
+      toast.error('Lookup system offline');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handlePincodeChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setFormData(prev => ({ ...prev, pincode: val }));
+    if (val.length === 6) performLookup(val);
+  };
+
+  const handlePincodeSelect = (suggestion) => {
+    performLookup(suggestion.pincode);
   };
 
   const copyAddress = () => {
@@ -84,12 +92,10 @@ const AddressAutofillForm = () => {
             <div className="space-y-6">
                 <div>
                     <label className="block text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">Pincode *</label>
-                    <div className="relative group">
-                        <MapPin className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${loading ? 'animate-pulse text-indigo-500' : 'opacity-30 group-focus-within:opacity-100 group-focus-within:text-indigo-500'}`} />
-                        <input 
-                            type="text" value={formData.pincode} onChange={handlePincodeChange}
-                            className={`w-full pl-12 pr-4 py-4 rounded-2xl border transition-all ${darkMode ? 'bg-white/5 border-white/10 focus:bg-white/10' : 'bg-gray-50 border-gray-200 focus:bg-white'} focus:ring-4 focus:ring-indigo-500/10 outline-none font-bold text-lg`}
-                            placeholder="6-digit PIN"
+                    <div className="relative group z-50">
+                        <PincodeAutocomplete 
+                            onSelect={handlePincodeSelect}
+                            placeholder="Type for smart suggestion..."
                         />
                     </div>
                 </div>

@@ -105,7 +105,7 @@ const PincodeAutocomplete = ({ onSelect, placeholder = "Enter PIN code..." }) =>
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full pl-12 pr-4 py-5 border transition-all ${darkMode ? 'bg-white/5 border-white/10 focus:bg-white/10' : 'bg-gray-50 border-gray-200 focus:bg-white'} rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-bold text-lg`}
           maxLength="6"
         />
         {loading && (

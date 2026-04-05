@@ -21,6 +21,8 @@ import { useTheme } from '../context/ThemeContext';
 
 import { API_BASE_URL as API_URL } from '../services/api';
 
+import PincodeAutocomplete from './PincodeAutocomplete';
+
 const DeliveryTimeEstimator = () => {
   const { darkMode } = useTheme();
   const [source, setSource] = useState('');
@@ -89,7 +91,7 @@ const DeliveryTimeEstimator = () => {
         </div>
       </div>
 
-      {/* Input Grid (IMAGE 2 MATCH) */}
+      {/* Input Grid (Autocomplete Integrated) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
           {/* Origin Point */}
           <div className="glass-card p-12 border-white/5 relative overflow-hidden group">
@@ -102,12 +104,10 @@ const DeliveryTimeEstimator = () => {
                       <h3 className="text-xs font-black opacity-30 tracking-[0.4em] uppercase">ORIGIN POINT</h3>
                   </div>
               </div>
-              <div className="relative group/input">
-                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 opacity-20 group-focus-within/input:opacity-100 transition-opacity" />
-                  <input 
-                    type="text" value={source} onChange={(e) => setSource(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="w-full bg-white border-2 border-white/5 rounded-3xl pl-16 pr-8 py-6 text-black font-black text-2xl outline-none focus:border-emerald-500/30 transition-all placeholder:opacity-10"
-                    placeholder="176323"
+              <div className="relative z-20">
+                  <PincodeAutocomplete 
+                    onSelect={(suggestion) => setSource(suggestion.pincode)} 
+                    placeholder="Enter source PIN" 
                   />
               </div>
           </div>
@@ -123,12 +123,10 @@ const DeliveryTimeEstimator = () => {
                       <h3 className="text-xs font-black opacity-30 tracking-[0.4em] uppercase">DESTINATION POINT</h3>
                   </div>
               </div>
-              <div className="relative group/input">
-                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 opacity-20 group-focus-within/input:opacity-100 transition-opacity" />
-                  <input 
-                    type="text" value={destination} onChange={(e) => setDestination(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="w-full bg-white border-2 border-white/5 rounded-3xl pl-16 pr-8 py-6 text-black font-black text-2xl outline-none focus:border-rose-500/30 transition-all placeholder:opacity-10"
-                    placeholder="176325"
+              <div className="relative z-20">
+                  <PincodeAutocomplete 
+                    onSelect={(suggestion) => setDestination(suggestion.pincode)} 
+                    placeholder="Enter dest PIN" 
                   />
               </div>
           </div>
