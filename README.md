@@ -1,6 +1,6 @@
 # 🚀 NEXUS OS – Logistics Intelligence Engine V2.0
 
-![Dashboard Preview](https://res.cloudinary.com/db3htfvvx/image/upload/q_auto/f_auto/v1775379466/Screenshot_2026-04-05_141404_n5wvwj.png)
+![Dashboard Preview](https://res.cloudinary.com/db3htfvvx/image/upload/q_auto/f_auto/v1775405004/Screenshot_2026-04-05_213155_id7jnj.png)
 
 Welcome to the **Logistics Intelligence Engine V2.0**, a state-of-the-art, high-fidelity geospatial intelligence platform designed to seamlessly visualize, interact with, and analyze the entirety of India’s postal and delivery logistics network. 
 
