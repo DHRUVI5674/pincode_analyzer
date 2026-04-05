@@ -770,14 +770,17 @@ const addressAutofill = async (req, res) => {
 
 const getDeliveryEstimate = async (req, res) => {
   try {
-    const { from, to } = req.query;
-    if (!from || !to) {
+    const { from, to, source, destination } = req.query;
+    const fromPin = source || from;
+    const toPin = destination || to;
+
+    if (!fromPin || !toPin) {
       return res.status(400).json({ message: 'Both source and destination PIN codes are required' });
     }
 
     // Input might be string from query, convert to Number to match schema
-    const sourceNum = parseInt(from);
-    const destNum = parseInt(to);
+    const sourceNum = parseInt(fromPin);
+    const destNum = parseInt(toPin);
 
     const [sourcePin, destPin] = await Promise.all([
       Pincode.findOne({ pincode: sourceNum }).select('latitude longitude stateName districtName regionName ' + STATE_KEY + ' ' + DISTRICT_KEY).lean(),
