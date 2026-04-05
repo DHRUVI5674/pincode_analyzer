@@ -1,4 +1,16 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    // In production (Vercel), default to relative /api if no VITE_API_URL is set
+    return '/api';
+  }
+  
+  return 'http://localhost:5000/api';
+};
+
+export const API_BASE_URL = getBaseUrl();
+console.log(`[API Config] Active Base URL: ${API_BASE_URL}`);
 
 // Request interceptor - add logging
 const request = async (url, options = {}) => {

@@ -36,10 +36,10 @@ const AddressAutofillForm = () => {
         }));
         toast.success('Smart lookup complete');
       } else {
-        toast.error(`Lookup Failed: ${data.message || 'Node not found'}`);
+        toast.error(`Lookup Failed: ${data.message || 'Node not found'} (Target: ${API_URL}/address-autofill/${pincode})`);
       }
     } catch (error) {
-      toast.error(`System Error: ${error.message || 'Lookup system offline'}`);
+      toast.error(`System Error: ${error.message} (Target: ${API_URL}/address-autofill/${pincode})`);
     } finally {
       setLoading(false);
     }

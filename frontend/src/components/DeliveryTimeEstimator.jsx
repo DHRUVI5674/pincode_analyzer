@@ -47,9 +47,10 @@ const DeliveryTimeEstimator = () => {
       setResult(response.data);
       toast.success('Route projection synchronized');
     } catch (error) {
+      const targetUrl = `${API_URL}/delivery-estimate`;
       const msg = error.response?.data?.message || error.message || 'Simulation failed';
-      toast.error(`Simulation Error: ${msg}`);
-      console.error('Delivery Estimator Error:', (error.response?.data || error.message));
+      toast.error(`Simulation Error: ${msg} (Target: ${targetUrl})`);
+      console.error('Delivery Estimator Error:', (error.response?.data || error.message), 'at', targetUrl);
     } finally {
       setLoading(false);
     }
