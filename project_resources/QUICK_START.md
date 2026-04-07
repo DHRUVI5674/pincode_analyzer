@@ -4,7 +4,7 @@
 
 ### Step 1: Start Backend (Terminal 1)
 ```bash
-cd backend
+cd ../backend
 npm install    # if not already installed
 node server.js
 ```
@@ -22,7 +22,7 @@ Server running on port 5000
 
 ### Step 2: Start Frontend (Terminal 2)
 ```bash
-cd frontend/frontend
+cd ../frontend/frontend
 npm install    # if not already installed
 npm run dev
 ```
@@ -101,17 +101,17 @@ Expected:
 ## 📂 NEW FILES CREATED
 
 ```
-frontend/src/
+../frontend/src/
 ├── services/
 │   └── api.js                    ← NEW: API wrapper with logging
 └── components/
     └── FilterPanel.jsx           ← NEW: Smart filter component
 
-backend/
+../backend/
 ├── config/
 │   └── createIndexes.js          ← NEW: MongoDB indexes
 
-Root/
+Resources/
 ├── SETUP_AND_VERIFICATION.md     ← Complete setup guide
 ├── INTEGRATION_GUIDE.md          ← Integration instructions  
 └── API_TEST_SCRIPT.js            ← Browser console test script

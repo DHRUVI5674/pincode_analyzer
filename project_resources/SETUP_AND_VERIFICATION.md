@@ -68,7 +68,7 @@ mongosh
 # Switch to database
 use city_pincode
 
-# Copy and paste each index command from backend/config/createIndexes.js
+# Copy and paste each index command from ../backend/config/createIndexes.js
 db.pincodes.createIndex({ state: 1 });
 db.pincodes.createIndex({ state: 1, district: 1 });
 db.pincodes.createIndex({ state: 1, district: 1, taluk: 1 });
@@ -83,14 +83,14 @@ db.pincodes.getIndexes();
 **Option B: Using Node.js Script**
 
 ```bash
-cd backend
+cd ../backend
 node config/createIndexes.js
 ```
 
 ### Step 2: Start Backend Server
 
 ```bash
-cd backend
+cd ../backend
 npm install  # if not already installed
 node server.js
 # Expected output: Server running on port 5000
@@ -100,7 +100,7 @@ node server.js
 ### Step 3: Start Frontend Server
 
 ```bash
-cd frontend/frontend
+cd ../frontend/frontend
 npm install  # if not already installed
 npm run dev
 # Expected output: VITE ready at http://localhost:5175 (or 5176)
@@ -249,13 +249,13 @@ Open browser DevTools console (F12) and verify:
 ## FILES MODIFIED/CREATED
 
 ### Backend
-- ✅ `/backend/routes/pincodeRoutes.js` - Enhanced with logging
-- ✅ `/backend/config/createIndexes.js` - MongoDB indexes setup
+- ✅ `../backend/routes/pincodeRoutes.js` - Enhanced with logging
+- ✅ `../backend/config/createIndexes.js` - MongoDB indexes setup
 
 ### Frontend
-- ✅ `/frontend/src/services/api.js` - Complete API service with logging
-- ✅ `/frontend/src/components/FilterPanel.jsx` - New filter component with lazy loading
-- ✅ `/frontend/src/App.jsx` - Updated navbar with mobile menu
+- ✅ `../frontend/src/services/api.js` - Complete API service with logging
+- ✅ `../frontend/src/components/FilterPanel.jsx` - New filter component with lazy loading
+- ✅ `../frontend/src/App.jsx` - Updated navbar with mobile menu
 
 ### Data Structure
 - ✅ MongoDB indexes created for optimal performance

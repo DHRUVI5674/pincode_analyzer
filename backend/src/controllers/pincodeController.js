@@ -240,10 +240,7 @@ const getPincodes = async (req, res) => {
       stateName: p[STATE_KEY] ? p[STATE_KEY].trim() : '',
       districtName: p[DISTRICT_KEY] ? p[DISTRICT_KEY].trim() : '',
       Taluk: p[TALUK_KEY] ? p[TALUK_KEY].trim() : '',
-      officeName: p.officeName ? p.officeName.trim() : '',
-      state: p[STATE_KEY] ? p[STATE_KEY].trim() : '', 
-      district: p[DISTRICT_KEY] ? p[DISTRICT_KEY].trim() : '',
-      taluk: p[TALUK_KEY] ? p[TALUK_KEY].trim() : ''
+      officeName: p.officeName ? p.officeName.trim() : ''
     }));
 
     res.json({
@@ -284,10 +281,7 @@ const searchPincodes = async (req, res) => {
       stateName: p[STATE_KEY] ? p[STATE_KEY].trim() : '',
       districtName: p[DISTRICT_KEY] ? p[DISTRICT_KEY].trim() : '',
       Taluk: p[TALUK_KEY] ? p[TALUK_KEY].trim() : '',
-      officeName: p.officeName ? p.officeName.trim() : '',
-      state: p[STATE_KEY] ? p[STATE_KEY].trim() : '',
-      district: p[DISTRICT_KEY] ? p[DISTRICT_KEY].trim() : '',
-      taluk: p[TALUK_KEY] ? p[TALUK_KEY].trim() : ''
+      officeName: p.officeName ? p.officeName.trim() : ''
     }));
 
     await SearchLog.create({
@@ -315,10 +309,7 @@ const getPincodeDetail = async (req, res) => {
       stateName: pincodeData[STATE_KEY] ? pincodeData[STATE_KEY].trim() : '',
       districtName: pincodeData[DISTRICT_KEY] ? pincodeData[DISTRICT_KEY].trim() : '',
       Taluk: pincodeData[TALUK_KEY] ? pincodeData[TALUK_KEY].trim() : '',
-      officeName: pincodeData.officeName ? pincodeData.officeName.trim() : '',
-      state: pincodeData[STATE_KEY] ? pincodeData[STATE_KEY].trim() : '',
-      district: pincodeData[DISTRICT_KEY] ? pincodeData[DISTRICT_KEY].trim() : '',
-      taluk: pincodeData[TALUK_KEY] ? pincodeData[TALUK_KEY].trim() : ''
+      officeName: pincodeData.officeName ? pincodeData.officeName.trim() : ''
     };
     
     res.json(normalizedData);
@@ -373,9 +364,9 @@ const getDeliveryDistribution = async (req, res) => {
     const [delivery, nonDelivery, headOffice, subOffice, branchOffice] = await Promise.all([
       Pincode.countDocuments({ deliveryStatus: 'Delivery' }),
       Pincode.countDocuments({ deliveryStatus: 'Non-Delivery' }),
-      Pincode.countDocuments({ officeType: { $in: [/^Head Office\s*$/i, 'H.O'] } }),
-      Pincode.countDocuments({ officeType: { $in: [/^Sub Office\s*$/i, 'S.O'] } }),
-      Pincode.countDocuments({ officeType: { $in: [/^Branch Office\s*$/i, 'B.O'] } })
+      Pincode.countDocuments({ officeType: 'Head Office' }),
+      Pincode.countDocuments({ officeType: 'Sub Office' }),
+      Pincode.countDocuments({ officeType: 'Branch Office' })
     ]);
     res.json({ success: true, delivery, nonDelivery, headOffice, subOffice, branchOffice });
   } catch (error) {
@@ -386,9 +377,9 @@ const getDeliveryDistribution = async (req, res) => {
 const getOfficeTypeDistribution = async (req, res) => {
   try {
     const [headOffice, subOffice, branchOffice] = await Promise.all([
-      Pincode.countDocuments({ officeType: { $in: [/^Head Office\s*$/i, 'H.O'] } }),
-      Pincode.countDocuments({ officeType: { $in: [/^Sub Office\s*$/i, 'S.O'] } }),
-      Pincode.countDocuments({ officeType: { $in: [/^Branch Office\s*$/i, 'B.O'] } }),
+      Pincode.countDocuments({ officeType: /^Head Office\s*$/i }),
+      Pincode.countDocuments({ officeType: /^Sub Office\s*$/i }),
+      Pincode.countDocuments({ officeType: /^Branch Office\s*$/i }),
     ]);
     res.json({ success: true, headOffice, subOffice, branchOffice });
   } catch (error) {
@@ -534,8 +525,8 @@ const getDivisionStats = async (req, res) => {
           totalPincodes: { $sum: 1 },
           deliveryOffices: { $sum: { $cond: [{ $eq: ['$deliveryStatus', 'Delivery'] }, 1, 0] } },
           nonDeliveryOffices: { $sum: { $cond: [{ $eq: ['$deliveryStatus', 'Non-Delivery'] }, 1, 0] } },
-          states: { $addToSet: `$${STATE_KEY}` },
-          districts: { $addToSet: `$${DISTRICT_KEY}` }
+          states: { $addToSet: '$state' },
+          districts: { $addToSet: '$district' }
         }
       },
       {
@@ -572,8 +563,8 @@ const getRegionCoverage = async (req, res) => {
         $group: {
           _id: '$regionName',
           totalOffices: { $sum: 1 },
-          states: { $addToSet: `$${STATE_KEY}` },
-          districts: { $addToSet: `$${DISTRICT_KEY}` },
+          states: { $addToSet: '$state' },
+          districts: { $addToSet: '$district' },
           deliveryOffices: { $sum: { $cond: [{ $eq: ['$deliveryStatus', 'Delivery'] }, 1, 0] } }
         }
       },
@@ -779,22 +770,14 @@ const addressAutofill = async (req, res) => {
 
 const getDeliveryEstimate = async (req, res) => {
   try {
-    const { from, to, source, destination } = req.query;
-    // Extreme redundancy: check query, then body, then params
-    const fPin = source || from || req.body.source || req.body.from || req.params.pincode1;
-    const tPin = destination || to || req.body.destination || req.body.to || req.params.pincode2;
-
-    if (!fPin || !tPin) {
-      console.log(`[DeliveryEstimate] Missing Params: qSource=${source}, qDest=${destination}, bSource=${req.body.source}`);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Both source and destination PIN codes are required',
-        received: { from: fPin, to: tPin }
-      });
+    const { from, to } = req.query;
+    if (!from || !to) {
+      return res.status(400).json({ message: 'Both source and destination PIN codes are required' });
     }
 
-    const sourceNum = parseInt(fPin);
-    const destNum = parseInt(tPin);
+    // Input might be string from query, convert to Number to match schema
+    const sourceNum = parseInt(from);
+    const destNum = parseInt(to);
 
     const [sourcePin, destPin] = await Promise.all([
       Pincode.findOne({ pincode: sourceNum }).select('latitude longitude stateName districtName regionName ' + STATE_KEY + ' ' + DISTRICT_KEY).lean(),
@@ -816,14 +799,7 @@ const getDeliveryEstimate = async (req, res) => {
     
     const distance = calculateDistance(sourcePin.latitude, sourcePin.longitude, destPin.latitude, destPin.longitude);
     const estimate = calculateDeliveryTime(sourcePin, destPin, distance);
-    res.json({ 
-      success: true, 
-      source: { pincode: fromPin, state: sourcePin.stateName, district: sourcePin.districtName, region: sourcePin.regionName }, 
-      destination: { pincode: toPin, state: destPin.stateName, district: destPin.districtName, region: destPin.regionName }, 
-      distance: Math.round(distance * 100) / 100, 
-      estimate,
-      deliveryEstimate: estimate // Include both for frontend compatibility
-    });
+    res.json({ success: true, source: { pincode: from, state: sourcePin.stateName, district: sourcePin.districtName, region: sourcePin.regionName }, destination: { pincode: to, state: destPin.stateName, district: destPin.districtName, region: destPin.regionName }, distance: Math.round(distance * 100) / 100, estimate });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
